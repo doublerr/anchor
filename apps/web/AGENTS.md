@@ -14,5 +14,6 @@ NextJS
 Supabase
 TailwindCSS
 React
+Mobile friendly designs
 
 Coding: prefer components when creating new things

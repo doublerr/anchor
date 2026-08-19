@@ -191,7 +191,7 @@ export default async function Home() {
             </div>
 
             {/* Target motif */}
-            <div className="relative mx-auto hidden aspect-square w-full max-w-sm lg:block">
+            <div className="relative mx-auto aspect-square w-full max-w-[260px] sm:max-w-xs lg:max-w-sm">
               <div className="absolute inset-0 rounded-full bg-muted" />
               {TARGET_RINGS.map((cls) => (
                 <div key={cls} className={`absolute rounded-full ${cls}`} aria-hidden />
