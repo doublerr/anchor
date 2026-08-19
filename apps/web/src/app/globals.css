@@ -1,26 +1,98 @@
 @import "tailwindcss";
 
+/*
+ * Anchor design tokens.
+ *
+ * Brand palette (fixed across light/dark) — drawn from the archery target:
+ *   gold  #FFD257  → primary brand accent, bullseye center
+ *   aqua  #65DEF1  → secondary accent, target blue ring
+ *   coral #FF5B5B  → tertiary accent + destructive/error, target red ring
+ *   ink   #3F4356 / #F3F3F3 → the neutral grey-purple ramp
+ *
+ * Semantic tokens (background/surface/foreground/border) flip between light
+ * and dark via CSS variables, so components rarely need `dark:` overrides.
+ */
+
+@theme {
+  /* Neutral ramp — anchored by #F3F3F3 (50) and #3F4356 (700) */
+  --color-ink-50: #f3f3f3;
+  --color-ink-100: #e9eaee;
+  --color-ink-200: #d8dae0;
+  --color-ink-300: #b9bcc7;
+  --color-ink-400: #9195a5;
+  --color-ink-500: #6e7286;
+  --color-ink-600: #565a6e;
+  --color-ink-700: #3f4356;
+  --color-ink-800: #2b2e3b;
+  --color-ink-900: #1e2029;
+  --color-ink-950: #16171e;
+
+  /* Gold — bullseye center #FFD257 */
+  --color-gold-50: #fff9ec;
+  --color-gold-100: #fff3d4;
+  --color-gold-200: #ffe9ab;
+  --color-gold-300: #ffdd7e;
+  --color-gold-400: #ffd257;
+  --color-gold-500: #f5c02e;
+  --color-gold-600: #d9a015;
+  --color-gold-700: #a97b10;
+
+  /* Aqua — target blue ring #65DEF1 */
+  --color-aqua-50: #ecfbfe;
+  --color-aqua-100: #d2f5fb;
+  --color-aqua-200: #a9ecf7;
+  --color-aqua-300: #8fe9f6;
+  --color-aqua-400: #65def1;
+  --color-aqua-500: #2fc6de;
+  --color-aqua-600: #159fb8;
+  --color-aqua-700: #0e6e7e;
+
+  /* Coral — target red ring #FF5B5B */
+  --color-coral-50: #fff0f0;
+  --color-coral-100: #ffdcdc;
+  --color-coral-200: #ffbdbd;
+  --color-coral-300: #ff8585;
+  --color-coral-400: #ff5b5b;
+  --color-coral-500: #f53b3b;
+  --color-coral-600: #d92020;
+  --color-coral-700: #a91414;
+}
+
+/* Semantic tokens — light theme (default) */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --surface: #ffffff;
+  --muted: #f3f3f3;
+  --foreground: #2b2e3b;
+  --muted-foreground: #565a6e;
+  --border: #e4e5ea;
+}
+
+/* Semantic tokens — dark theme */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #16171e;
+    --surface: #1e2029;
+    --muted: #23252f;
+    --foreground: #f3f3f3;
+    --muted-foreground: #9195a5;
+    --border: #2b2e3b;
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-muted: var(--muted);
   --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }

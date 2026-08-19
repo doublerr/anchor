@@ -2,8 +2,11 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { supabaseEnv } from "./config";
 
-/** Paths reachable without a session (login form + auth callbacks). */
+/** Path prefixes reachable without a session (login form + auth callbacks). */
 const PUBLIC_PATHS = ["/login", "/auth"];
+
+/** Exact paths reachable without a session (public marketing pages). */
+const PUBLIC_EXACT_PATHS = ["/"];
 
 /**
  * Refreshes the Supabase auth session on every request and redirects
@@ -38,9 +41,9 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const isPublic = PUBLIC_PATHS.some(
-    (p) => pathname === p || pathname.startsWith(`${p}/`),
-  );
+  const isPublic =
+    PUBLIC_EXACT_PATHS.includes(pathname) ||
+    PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
   if (!user && !isPublic) {
     const redirectUrl = request.nextUrl.clone();

@@ -1,88 +1,369 @@
-import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { SiteHeader } from "@/components/marketing/site-header";
+import { SiteFooter } from "@/components/marketing/site-footer";
+import { buttonPrimary, buttonSecondary } from "@/components/ui/button-styles";
+import {
+  ArrowRightIcon,
+  BellIcon,
+  BowIcon,
+  CalendarIcon,
+  CheckIcon,
+  MembersIcon,
+  ScoreIcon,
+  TargetMark,
+  TrophyIcon,
+} from "@/components/marketing/icons";
+
+export const metadata = {
+  title: "Anchor · Archery club & team management",
+  description:
+    "Anchor is the all-in-one platform for archery clubs and teams — manage members, track scores, schedule practice, and run competitions.",
+};
+
+// Tinted tile styles for feature icons, rotating through the brand accents.
+const ACCENT_TILE = {
+  gold: "bg-gold-100 text-gold-700 dark:bg-gold-400/15 dark:text-gold-300",
+  aqua: "bg-aqua-100 text-aqua-700 dark:bg-aqua-400/15 dark:text-aqua-300",
+  coral: "bg-coral-100 text-coral-700 dark:bg-coral-400/15 dark:text-coral-300",
+} as const;
+
+const FEATURES = [
+  {
+    icon: MembersIcon,
+    accent: "gold",
+    title: "Member management",
+    body: "Keep a complete roster with contact details, skill levels, and membership status. Onboard new archers in minutes.",
+  },
+  {
+    icon: ScoreIcon,
+    accent: "aqua",
+    title: "Score tracking",
+    body: "Log rounds and ends, track personal bests, and watch each archer's progress climb over the season.",
+  },
+  {
+    icon: CalendarIcon,
+    accent: "coral",
+    title: "Practice scheduling",
+    body: "Publish range sessions and lessons, manage sign-ups, and take attendance without the group-chat chaos.",
+  },
+  {
+    icon: TrophyIcon,
+    accent: "gold",
+    title: "Competitions",
+    body: "Run club shoots and league events with brackets, live leaderboards, and results your members can revisit.",
+  },
+  {
+    icon: BellIcon,
+    accent: "aqua",
+    title: "Announcements",
+    body: "Reach every member with news, weather cancellations, and reminders — right where they already look.",
+  },
+  {
+    icon: BowIcon,
+    accent: "coral",
+    title: "Equipment log",
+    body: "Track club bows, arrows, and targets, flag gear that needs service, and know what's on the shelf.",
+  },
+] as const;
+
+const WORKFLOW = [
+  {
+    step: "01",
+    title: "Create your organization",
+    body: "Spin up a club or team in under a minute. Invite coaches and give them the right access.",
+  },
+  {
+    step: "02",
+    title: "Add your archers",
+    body: "Import your roster or let members join with a link. Every profile is theirs to keep.",
+  },
+  {
+    step: "03",
+    title: "Run your season",
+    body: "Schedule practice, record scores, and host competitions — all from one shared home base.",
+  },
+];
+
+const STATS = [
+  { value: "10", unit: "rings", label: "Every score, end to end" },
+  { value: "1", unit: "home", label: "For your whole club" },
+  { value: "0", unit: "spreadsheets", label: "Left to wrangle" },
+];
+
+const PLANS = [
+  {
+    name: "Club",
+    price: "Free",
+    cadence: "for small clubs",
+    highlight: false,
+    features: [
+      "Up to 25 members",
+      "Score tracking",
+      "Practice scheduling",
+      "Community support",
+    ],
+    cta: "Start free",
+  },
+  {
+    name: "Team",
+    price: "$29",
+    cadence: "per month",
+    highlight: true,
+    features: [
+      "Unlimited members",
+      "Competitions & leaderboards",
+      "Announcements & attendance",
+      "Equipment log",
+      "Priority support",
+    ],
+    cta: "Start free trial",
+  },
+  {
+    name: "League",
+    price: "Custom",
+    cadence: "for multi-club programs",
+    highlight: false,
+    features: [
+      "Everything in Team",
+      "Multiple organizations",
+      "Cross-club events",
+      "Dedicated onboarding",
+    ],
+    cta: "Contact sales",
+  },
+];
+
+// Concentric target rings (outer → in). Gaps use the surface token so the
+// bullseye stays crisp in both light and dark themes.
+const TARGET_RINGS = [
+  "inset-0 bg-ink-900 dark:bg-ink-100",
+  "inset-[11%] bg-surface",
+  "inset-[22%] bg-aqua-400",
+  "inset-[33%] bg-coral-400",
+  "inset-[42%] bg-gold-400",
+];
 
 export default async function Home() {
   const supabase = await createClient();
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  // The proxy already guards this route; this is a defensive fallback.
-  if (!user) {
-    redirect("/login");
-  }
-
-  // RLS ensures this only ever returns the signed-in user's own profile row.
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name, updated_at")
-    .eq("id", user.id)
-    .single();
-
-  async function signOut() {
-    "use server";
-    const supabase = await createClient();
-    await supabase.auth.signOut();
-    redirect("/login");
-  }
+  const signedIn = Boolean(user);
 
   return (
-    <div className="flex flex-1 flex-col bg-zinc-50 dark:bg-black">
-      <header className="flex items-center justify-between border-b border-zinc-200 bg-white px-6 py-4 dark:border-zinc-800 dark:bg-zinc-950">
-        <span className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Anchor
-        </span>
-        <form action={signOut}>
-          <button className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900">
-            Sign out
-          </button>
-        </form>
-      </header>
+    <div className="flex flex-1 flex-col bg-background text-foreground">
+      <SiteHeader signedIn={signedIn} />
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-12">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Welcome{profile?.full_name ? `, ${profile.full_name}` : ""}
-        </h1>
-        <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-          You are signed in. This page talks directly to Supabase — the profile
-          below is read under Row Level Security, so you can only ever see your
-          own row.
-        </p>
+      <main className="flex-1">
+        {/* Hero */}
+        <section className="relative overflow-hidden">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_0%,rgba(255,210,87,0.16),transparent)]"
+          />
+          <div className="relative mx-auto grid w-full max-w-6xl gap-12 px-6 py-20 lg:grid-cols-2 lg:items-center lg:py-28">
+            <div>
+              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-muted-foreground">
+                <TargetMark className="h-3.5 w-3.5 text-foreground" />
+                Built for archery clubs & teams
+              </span>
+              <h1 className="mt-6 text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl">
+                Run your archery club without the busywork.
+              </h1>
+              <p className="mt-6 max-w-lg text-lg text-muted-foreground">
+                Anchor brings your roster, scores, practice schedule, and
+                competitions together in one clean, shared home — so you can
+                spend more time on the line and less time on admin.
+              </p>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link href="/login" className={`${buttonPrimary} px-5 py-3 text-sm`}>
+                  Create your organization
+                  <ArrowRightIcon className="h-4 w-4" />
+                </Link>
+                <a href="#features" className={`${buttonSecondary} px-5 py-3 text-sm`}>
+                  See features
+                </a>
+              </div>
+              <p className="mt-4 text-sm text-muted-foreground">
+                Free to start · No credit card required
+              </p>
+            </div>
 
-        <dl className="mt-8 grid gap-4 rounded-xl border border-zinc-200 bg-white p-6 text-sm dark:border-zinc-800 dark:bg-zinc-950 sm:grid-cols-2">
-          <div>
-            <dt className="text-zinc-500 dark:text-zinc-400">User ID</dt>
-            <dd className="mt-1 font-mono text-zinc-900 dark:text-zinc-100">
-              {user.id}
-            </dd>
+            {/* Target motif */}
+            <div className="relative mx-auto hidden aspect-square w-full max-w-sm lg:block">
+              <div className="absolute inset-0 rounded-full bg-muted" />
+              {TARGET_RINGS.map((cls) => (
+                <div key={cls} className={`absolute rounded-full ${cls}`} aria-hidden />
+              ))}
+              <div
+                aria-hidden
+                className="absolute top-1/2 left-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink-900"
+              />
+            </div>
           </div>
-          <div>
-            <dt className="text-zinc-500 dark:text-zinc-400">Email</dt>
-            <dd className="mt-1 text-zinc-900 dark:text-zinc-100">
-              {user.email}
-            </dd>
+        </section>
+
+        {/* Features */}
+        <section id="features" className="border-t border-border bg-muted">
+          <div className="mx-auto w-full max-w-6xl px-6 py-20 lg:py-24">
+            <div className="max-w-2xl">
+              <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                Everything your club needs, on one target
+              </h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                Purpose-built for the way archery clubs and teams actually run —
+                from your first recruit to your season championship.
+              </p>
+            </div>
+
+            <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {FEATURES.map((feature) => (
+                <div
+                  key={feature.title}
+                  className="rounded-2xl border border-border bg-surface p-6 transition hover:-translate-y-0.5 hover:shadow-sm"
+                >
+                  <div
+                    className={`flex h-11 w-11 items-center justify-center rounded-xl ${ACCENT_TILE[feature.accent]}`}
+                  >
+                    <feature.icon className="h-6 w-6" />
+                  </div>
+                  <h3 className="mt-5 text-lg font-semibold">{feature.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    {feature.body}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
-          <div>
-            <dt className="text-zinc-500 dark:text-zinc-400">
-              Profile full name
-            </dt>
-            <dd className="mt-1 text-zinc-900 dark:text-zinc-100">
-              {profile?.full_name ?? "—"}
-            </dd>
+        </section>
+
+        {/* Workflow */}
+        <section id="workflow" className="mx-auto w-full max-w-6xl px-6 py-20 lg:py-24">
+          <div className="max-w-2xl">
+            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+              Up and running in three steps
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              No lengthy setup, no migration project. Create your organization
+              and invite your archers today.
+            </p>
           </div>
-          <div>
-            <dt className="text-zinc-500 dark:text-zinc-400">
-              Profile updated
-            </dt>
-            <dd className="mt-1 text-zinc-900 dark:text-zinc-100">
-              {profile?.updated_at
-                ? new Date(profile.updated_at).toLocaleString()
-                : "—"}
-            </dd>
+
+          <div className="mt-14 grid gap-8 md:grid-cols-3">
+            {WORKFLOW.map((item) => (
+              <div key={item.step} className="relative">
+                <span className="text-sm font-semibold text-gold-600">
+                  {item.step}
+                </span>
+                <h3 className="mt-3 text-xl font-semibold">{item.title}</h3>
+                <p className="mt-2 text-muted-foreground">{item.body}</p>
+              </div>
+            ))}
           </div>
-        </dl>
+
+          <div className="mt-14 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-3">
+            {STATS.map((stat) => (
+              <div key={stat.label} className="bg-surface px-6 py-8 text-center">
+                <div className="text-4xl font-semibold tracking-tight">
+                  {stat.value}
+                  <span className="ml-1 text-lg font-medium text-muted-foreground">
+                    {stat.unit}
+                  </span>
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Pricing */}
+        <section id="pricing" className="border-t border-border bg-muted">
+          <div className="mx-auto w-full max-w-6xl px-6 py-20 lg:py-24">
+            <div className="mx-auto max-w-2xl text-center">
+              <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                Simple pricing that grows with you
+              </h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                Start free and upgrade when your club is ready. Every plan
+                includes the core tools your archers rely on.
+              </p>
+            </div>
+
+            <div className="mt-14 grid gap-6 lg:grid-cols-3">
+              {PLANS.map((plan) => (
+                <div
+                  key={plan.name}
+                  className={`flex flex-col rounded-2xl border bg-surface p-8 ${
+                    plan.highlight
+                      ? "border-gold-400 shadow-md ring-1 ring-gold-400"
+                      : "border-border"
+                  }`}
+                >
+                  {plan.highlight ? (
+                    <span className="mb-4 inline-flex w-fit rounded-full bg-gold-400 px-3 py-1 text-xs font-semibold text-ink-900">
+                      Most popular
+                    </span>
+                  ) : null}
+                  <h3 className="text-lg font-semibold">{plan.name}</h3>
+                  <div className="mt-4 flex items-baseline gap-1">
+                    <span className="text-4xl font-semibold tracking-tight">
+                      {plan.price}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      {plan.cadence}
+                    </span>
+                  </div>
+                  <ul className="mt-6 flex-1 space-y-3">
+                    {plan.features.map((feature) => (
+                      <li key={feature} className="flex items-start gap-2 text-sm">
+                        <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />
+                        <span className="text-foreground/90">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    href="/login"
+                    className={`mt-8 px-4 py-2.5 text-sm ${
+                      plan.highlight ? buttonPrimary : buttonSecondary
+                    }`}
+                  >
+                    {plan.cta}
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Final CTA */}
+        <section className="mx-auto w-full max-w-6xl px-6 py-20 lg:py-24">
+          <div className="relative overflow-hidden rounded-3xl bg-ink-900 px-8 py-16 text-center">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_60%_at_50%_0%,rgba(255,210,87,0.22),transparent)]"
+            />
+            <div className="relative mx-auto max-w-2xl">
+              <TargetMark className="mx-auto h-10 w-10 text-ink-50" />
+              <h2 className="mt-6 text-3xl font-semibold tracking-tight text-ink-50 sm:text-4xl">
+                Ready to bring your club together?
+              </h2>
+              <p className="mt-4 text-lg text-ink-300">
+                Create your organization in minutes and give your archers a home
+                worth showing up for.
+              </p>
+              <div className="mt-8">
+                <Link href="/login" className={`${buttonPrimary} px-6 py-3 text-sm`}>
+                  Create your organization
+                  <ArrowRightIcon className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
+
+      <SiteFooter />
     </div>
   );
 }
