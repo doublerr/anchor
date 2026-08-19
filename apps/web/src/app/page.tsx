@@ -8,11 +8,11 @@ import {
   BellIcon,
   BowIcon,
   CalendarIcon,
+  CardIcon,
   CheckIcon,
   MembersIcon,
   ScoreIcon,
   TargetMark,
-  TrophyIcon,
 } from "@/components/marketing/icons";
 
 export const metadata = {
@@ -32,38 +32,38 @@ const FEATURES = [
   {
     icon: MembersIcon,
     accent: "gold",
-    title: "Member management",
-    body: "Keep a complete roster with contact details, skill levels, and membership status. Onboard new archers in minutes.",
-  },
-  {
-    icon: ScoreIcon,
-    accent: "aqua",
-    title: "Score tracking",
-    body: "Log rounds and ends, track personal bests, and watch each archer's progress climb over the season.",
+    title: "Members & roles",
+    body: "A complete roster with contact details and roles for archers, parents, instructors, and admins.",
   },
   {
     icon: CalendarIcon,
-    accent: "coral",
-    title: "Practice scheduling",
-    body: "Publish range sessions and lessons, manage sign-ups, and take attendance without the group-chat chaos.",
+    accent: "aqua",
+    title: "Classes & scheduling",
+    body: "An embedded site calendar with recurring and drop-in classes, easy sign-ups, and class credits.",
   },
   {
-    icon: TrophyIcon,
-    accent: "gold",
-    title: "Competitions",
-    body: "Run club shoots and league events with brackets, live leaderboards, and results your members can revisit.",
+    icon: ScoreIcon,
+    accent: "coral",
+    title: "Scoring & analytics",
+    body: "A mobile-friendly scoring app plus analytics that track every archer's progress across classes and scores.",
   },
   {
     icon: BellIcon,
+    accent: "gold",
+    title: "Communications",
+    body: "Reach members over email, SMS, browser push, and WhatsApp — announcements, reminders, and nudges.",
+  },
+  {
+    icon: CardIcon,
     accent: "aqua",
-    title: "Announcements",
-    body: "Reach every member with news, weather cancellations, and reminders — right where they already look.",
+    title: "Payments & gear",
+    body: "Collect dues and fees through Stripe and Zelle, and point new archers to recommended gear lists.",
   },
   {
     icon: BowIcon,
     accent: "coral",
-    title: "Equipment log",
-    body: "Track club bows, arrows, and targets, flag gear that needs service, and know what's on the shelf.",
+    title: "Archer lockers",
+    body: "Give each archer private video and media hosting plus saved bow settings they carry season to season.",
   },
 ] as const;
 
@@ -93,44 +93,71 @@ const STATS = [
 
 const PLANS = [
   {
-    name: "Club",
-    price: "Free",
-    cadence: "for small clubs",
+    name: "Free",
+    price: "$0",
+    cadence: "forever",
     highlight: false,
+    inherits: null,
     features: [
-      "Up to 25 members",
-      "Score tracking",
-      "Practice scheduling",
-      "Community support",
+      "Club profile: contact info, locations & instructors",
+      "Mobile-friendly site hosting",
+      "Member management with roles",
+      "Embedded class calendar (recurring & drop-in)",
+      "New-archer signup by email or phone",
+      "Email content & newsletters",
     ],
     cta: "Start free",
   },
   {
-    name: "Team",
-    price: "$29",
+    name: "Standard",
+    price: "$99",
     cadence: "per month",
     highlight: true,
+    inherits: "Free",
     features: [
-      "Unlimited members",
-      "Competitions & leaderboards",
-      "Announcements & attendance",
-      "Equipment log",
-      "Priority support",
+      "Your own club subdomain (yourclub.anchorplatforms.site)",
+      "Email, SMS & browser push notifications",
+      "Google & Apple login with calendar sync",
+      "Auto sign-up & class credits",
+      "Stripe & Zelle payments",
+      "Club media hosting",
+      "Recommended gear lists",
     ],
     cta: "Start free trial",
   },
   {
-    name: "League",
-    price: "Custom",
-    cadence: "for multi-club programs",
+    name: "Pro",
+    price: "$149",
+    cadence: "per month",
     highlight: false,
+    inherits: "Standard",
     features: [
-      "Everything in Team",
-      "Multiple organizations",
-      "Cross-club events",
-      "Dedicated onboarding",
+      "Custom domain support (yourclub.com)",
+      "WhatsApp integration",
+      "Web-based scoring app for mobile",
+      "Archer lockers: private video & bow settings",
+      "Class & score analytics",
+      "Weekly themed content & auto intro emails",
+      "Member engagement nudges",
     ],
-    cta: "Contact sales",
+    cta: "Start free trial",
+  },
+];
+
+const ADDONS = [
+  {
+    name: "AI assistant",
+    price: "+$25",
+    cadence: "per month",
+    requires: "Requires Standard or Pro",
+    body: "Your club's own chatbot that can take action across the site — guiding new-member signup, answering questions, and more — plus auto-scoring from photos and videos.",
+  },
+  {
+    name: "Native mobile app",
+    price: "+$25",
+    cadence: "per month",
+    requires: "Requires Pro",
+    body: "A branded iOS and Android app for your team, so members carry your club in their pocket.",
   },
 ];
 
@@ -294,14 +321,14 @@ export default async function Home() {
               {PLANS.map((plan) => (
                 <div
                   key={plan.name}
-                  className={`flex flex-col rounded-2xl border bg-surface p-8 ${
+                  className={`relative flex flex-col rounded-2xl border bg-surface p-8 ${
                     plan.highlight
                       ? "border-gold-400 shadow-md ring-1 ring-gold-400"
                       : "border-border"
                   }`}
                 >
                   {plan.highlight ? (
-                    <span className="mb-4 inline-flex w-fit rounded-full bg-gold-400 px-3 py-1 text-xs font-semibold text-ink-900">
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gold-400 px-3 py-1 text-xs font-semibold text-ink-900 shadow-sm">
                       Most popular
                     </span>
                   ) : null}
@@ -314,7 +341,12 @@ export default async function Home() {
                       {plan.cadence}
                     </span>
                   </div>
-                  <ul className="mt-6 flex-1 space-y-3">
+                  {plan.inherits ? (
+                    <p className="mt-6 text-sm font-medium text-foreground">
+                      Everything in {plan.inherits}, plus:
+                    </p>
+                  ) : null}
+                  <ul className="mt-4 flex-1 space-y-3">
                     {plan.features.map((feature) => (
                       <li key={feature} className="flex items-start gap-2 text-sm">
                         <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />
@@ -332,6 +364,41 @@ export default async function Home() {
                   </Link>
                 </div>
               ))}
+            </div>
+
+            {/* Add-ons */}
+            <div className="mt-10">
+              <h3 className="text-center text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+                Add-ons
+              </h3>
+              <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:mx-auto lg:max-w-4xl">
+                {ADDONS.map((addon) => (
+                  <div
+                    key={addon.name}
+                    className="rounded-2xl border border-border bg-surface p-6"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h4 className="text-lg font-semibold">{addon.name}</h4>
+                        <p className="mt-1 text-xs font-medium text-gold-600">
+                          {addon.requires}
+                        </p>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <span className="text-2xl font-semibold tracking-tight">
+                          {addon.price}
+                        </span>
+                        <span className="block text-xs text-muted-foreground">
+                          {addon.cadence}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                      {addon.body}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>

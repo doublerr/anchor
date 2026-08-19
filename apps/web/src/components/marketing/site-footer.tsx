@@ -39,8 +39,8 @@ export function SiteFooter() {
             </span>
           </div>
           <p className="mt-3 max-w-xs text-sm text-muted-foreground">
-            Everything your archery club needs to run practice, track scores,
-            and grow — in one place.
+            Anchor Platforms — everything your archery club needs to run
+            practice, track scores, and grow, in one place.
           </p>
         </div>
 
@@ -67,7 +67,7 @@ export function SiteFooter() {
 
       <div className="border-t border-border">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-2 px-6 py-6 text-sm text-muted-foreground sm:flex-row">
-          <p>© {new Date().getFullYear()} Anchor. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Anchor Platforms. All rights reserved.</p>
           <Link
             href="/login"
             className="font-medium text-foreground transition hover:text-gold-600"
