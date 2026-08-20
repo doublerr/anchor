@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { login, signup } from "./actions";
+import { login } from "./actions";
 import { TargetMark } from "@/components/marketing/icons";
-import { buttonPrimary, buttonSecondary } from "@/components/ui/button-styles";
+import { buttonPrimary } from "@/components/ui/button-styles";
 
 export const metadata = {
   title: "Sign in · Anchor",
@@ -45,17 +45,6 @@ export default async function LoginPage({
           ) : null}
 
           <label className="flex flex-col gap-1 text-sm font-medium text-foreground">
-            Full name
-            <input
-              name="full_name"
-              type="text"
-              autoComplete="name"
-              placeholder="Only needed to sign up"
-              className={fieldClass}
-            />
-          </label>
-
-          <label className="flex flex-col gap-1 text-sm font-medium text-foreground">
             Email
             <input
               name="email"
@@ -78,17 +67,22 @@ export default async function LoginPage({
             />
           </label>
 
-          <div className="mt-2 flex flex-col gap-2">
-            <button formAction={login} className={`${buttonPrimary} px-3 py-2 text-sm`}>
-              Sign in
-            </button>
-            <button
-              formAction={signup}
-              className={`${buttonSecondary} px-3 py-2 text-sm`}
+          <button
+            formAction={login}
+            className={`${buttonPrimary} mt-2 px-3 py-2 text-sm`}
+          >
+            Sign in
+          </button>
+
+          <p className="text-center text-sm text-muted-foreground">
+            Setting up a club?{" "}
+            <Link
+              href="/signup"
+              className="font-medium text-foreground underline"
             >
-              Create account
-            </button>
-          </div>
+              Create an organization
+            </Link>
+          </p>
         </form>
       </div>
     </div>

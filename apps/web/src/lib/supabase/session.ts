@@ -2,8 +2,8 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { supabaseEnv } from "./config";
 
-/** Path prefixes reachable without a session (login form + auth callbacks). */
-const PUBLIC_PATHS = ["/login", "/auth"];
+/** Path prefixes reachable without a session (auth forms + callbacks). */
+const PUBLIC_PATHS = ["/login", "/signup", "/auth"];
 
 /** Exact paths reachable without a session (public marketing pages). */
 const PUBLIC_EXACT_PATHS = ["/"];

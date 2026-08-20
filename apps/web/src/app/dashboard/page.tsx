@@ -22,9 +22,16 @@ export default async function Dashboard() {
   // RLS ensures this only ever returns the signed-in user's own profile row.
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, updated_at")
+    .select("full_name, phone, updated_at")
     .eq("id", user.id)
     .single();
+
+  // The organizations this user is a member of, with their role. RLS scopes
+  // this to memberships that belong to the signed-in user.
+  const { data: memberships } = await supabase
+    .from("organization_members")
+    .select("member_role, organizations (name)")
+    .eq("profile_id", user.id);
 
   async function signOut() {
     "use server";
@@ -71,6 +78,10 @@ export default async function Dashboard() {
             <dd className="mt-1 text-foreground">{profile?.full_name ?? "—"}</dd>
           </div>
           <div>
+            <dt className="text-muted-foreground">Phone</dt>
+            <dd className="mt-1 text-foreground">{profile?.phone ?? "—"}</dd>
+          </div>
+          <div>
             <dt className="text-muted-foreground">Profile updated</dt>
             <dd className="mt-1 text-foreground">
               {profile?.updated_at
@@ -79,6 +90,42 @@ export default async function Dashboard() {
             </dd>
           </div>
         </dl>
+
+        <section className="mt-8">
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">
+            Your organizations
+          </h2>
+          {memberships && memberships.length > 0 ? (
+            <ul className="mt-4 flex flex-col gap-3">
+              {memberships.map((m, i) => {
+                // Supabase types a joined relation as an array; this is a
+                // to-one relation, so take the first row.
+                const rel = m.organizations as
+                  | { name: string }
+                  | { name: string }[]
+                  | null;
+                const org = Array.isArray(rel) ? rel[0] : rel;
+                return (
+                  <li
+                    key={i}
+                    className="flex items-center justify-between rounded-xl border border-border bg-surface px-6 py-4"
+                  >
+                    <span className="font-medium text-foreground">
+                      {org?.name ?? "—"}
+                    </span>
+                    <span className="rounded-full bg-gold-100 px-3 py-1 text-xs font-semibold text-ink-900 dark:bg-gold-400/20 dark:text-gold-200">
+                      {m.member_role}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p className="mt-2 text-sm text-muted-foreground">
+              You aren&rsquo;t part of an organization yet.
+            </p>
+          )}
+        </section>
       </main>
     </div>
   );
