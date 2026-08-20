@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { login } from "./actions";
-import { TargetMark } from "@/components/marketing/icons";
 import { buttonPrimary } from "@/components/ui/button-styles";
 
 export const metadata = {
@@ -21,14 +20,11 @@ export default async function LoginPage({
     <div className="flex flex-1 items-center justify-center bg-muted px-4 py-16">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <TargetMark className="h-7 w-7 text-foreground" />
-            <span className="text-2xl font-semibold tracking-tight text-foreground">
-              Anchor
-            </span>
-          </Link>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+            Welcome back
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Archery club management
+            Sign in to your Anchor account
           </p>
         </div>
 

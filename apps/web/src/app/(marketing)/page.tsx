@@ -1,7 +1,4 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
-import { SiteHeader } from "@/components/marketing/site-header";
-import { SiteFooter } from "@/components/marketing/site-footer";
 import { InterestForm } from "@/components/marketing/interest-form";
 import { buttonPrimary, buttonSecondary } from "@/components/ui/button-styles";
 import {
@@ -172,22 +169,14 @@ const TARGET_RINGS = [
   "inset-[42%] bg-gold-400",
 ];
 
-export default async function Home() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const signedIn = Boolean(user);
+export default function Home() {
   // Public sign-in / signup is gated to local dev for now; everyone else sees
   // the "Interested?" lead-capture flow instead.
   const authEnabled = process.env.NODE_ENV === "development";
 
   return (
-    <div className="flex flex-1 flex-col bg-background text-foreground">
-      <SiteHeader signedIn={signedIn} authEnabled={authEnabled} />
-
-      <main className="flex-1">
-        {/* Hero */}
+    <>
+      {/* Hero */}
         <section className="relative overflow-hidden">
           <div
             aria-hidden
@@ -454,9 +443,6 @@ export default async function Home() {
             </div>
           </div>
         </section>
-      </main>
-
-      <SiteFooter />
-    </div>
+    </>
   );
 }

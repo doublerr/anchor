@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { signup } from "@/app/signup/actions";
+import { signup } from "@/app/(marketing)/signup/actions";
 import { buttonPrimary } from "@/components/ui/button-styles";
 
 const fieldClass =

@@ -5,9 +5,9 @@ const FOOTER_GROUPS = [
   {
     heading: "Product",
     links: [
-      { href: "#features", label: "Features" },
-      { href: "#workflow", label: "How it works" },
-      { href: "#pricing", label: "Pricing" },
+      { href: "/#features", label: "Features" },
+      { href: "/#workflow", label: "How it works" },
+      { href: "/#pricing", label: "Pricing" },
     ],
   },
   {
