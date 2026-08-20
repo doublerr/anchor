@@ -5,7 +5,6 @@ import { buttonPrimary, buttonSecondary } from "@/components/ui/button-styles";
 
 const NAV_LINKS = [
   { href: "/#features", label: "Features" },
-  { href: "/#workflow", label: "How it works" },
   { href: "/#pricing", label: "Pricing" },
 ];
 

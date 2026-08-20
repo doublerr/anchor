@@ -2,6 +2,11 @@ import Link from "next/link";
 import { InterestForm } from "@/components/marketing/interest-form";
 import { buttonPrimary, buttonSecondary } from "@/components/ui/button-styles";
 import {
+  RosterMockup,
+  ScheduleMockup,
+  ScoringMockup,
+} from "@/components/marketing/feature-mockups";
+import {
   ArrowRightIcon,
   BellIcon,
   BowIcon,
@@ -26,25 +31,40 @@ const ACCENT_TILE = {
   coral: "bg-coral-100 text-coral-700 dark:bg-coral-400/15 dark:text-coral-300",
 } as const;
 
-const FEATURES = [
+// Flagship capabilities — each gets a full alternating row with an in-app
+// "screenshot" (see feature-mockups) beside the copy.
+const SHOWCASE = [
   {
     icon: MembersIcon,
     accent: "gold",
-    title: "Members & roles",
-    body: "A complete roster with contact details and roles for archers, parents, instructors, and admins.",
+    eyebrow: "Members & roles",
+    title: "One roster for archers, parents, and coaches",
+    body: "Keep contact details, roles, and status in a single shared roster. Assign the right access to instructors and admins, and let members join with a link — every profile is theirs to keep.",
+    points: ["Role-based access", "Self-serve join links", "Guardian links for youth archers"],
+    Mockup: RosterMockup,
   },
   {
     icon: CalendarIcon,
     accent: "aqua",
-    title: "Classes & scheduling",
-    body: "An embedded site calendar with recurring and drop-in classes, easy sign-ups, and class credits.",
+    eyebrow: "Classes & scheduling",
+    title: "Practice and classes that fill themselves",
+    body: "An embedded site calendar handles recurring and drop-in classes, capacity limits, and class credits. Archers sign up in a tap and you always know who's on the line.",
+    points: ["Recurring & drop-in classes", "Live sign-up counts", "Class credits & auto sign-up"],
+    Mockup: ScheduleMockup,
   },
   {
     icon: ScoreIcon,
     accent: "coral",
-    title: "Scoring & analytics",
-    body: "A mobile-friendly scoring app plus analytics that track every archer's progress across classes and scores.",
+    eyebrow: "Scoring & analytics",
+    title: "Every arrow, tracked and trending",
+    body: "A mobile-friendly scoring app records ends on the line, then rolls each archer's progress into clean analytics — so improvement is something you can actually see across the season.",
+    points: ["Score on any phone", "Per-archer progress", "Season & class analytics"],
+    Mockup: ScoringMockup,
   },
+] as const;
+
+// Secondary capabilities — compact icon cards below the showcases.
+const FEATURES = [
   {
     icon: BellIcon,
     accent: "gold",
@@ -64,30 +84,6 @@ const FEATURES = [
     body: "Give each archer private video and media hosting plus saved bow settings they carry season to season.",
   },
 ] as const;
-
-const WORKFLOW = [
-  {
-    step: "01",
-    title: "Create your organization",
-    body: "Spin up a club or team in under a minute. Invite coaches and give them the right access.",
-  },
-  {
-    step: "02",
-    title: "Add your archers",
-    body: "Import your roster or let members join with a link. Every profile is theirs to keep.",
-  },
-  {
-    step: "03",
-    title: "Run your season",
-    body: "Schedule practice, record scores, and host competitions — all from one shared home base.",
-  },
-];
-
-const STATS = [
-  { value: "10", unit: "rings", label: "Every score, end to end" },
-  { value: "1", unit: "home", label: "For your whole club" },
-  { value: "0", unit: "spreadsheets", label: "Left to wrangle" },
-];
 
 const PLANS = [
   {
@@ -244,7 +240,51 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {/* Flagship showcases — copy alternates sides with an app preview */}
+            <div className="mt-16 flex flex-col gap-16 lg:gap-24">
+              {SHOWCASE.map((item, i) => (
+                <div
+                  key={item.eyebrow}
+                  className="grid items-center gap-8 lg:grid-cols-2 lg:gap-14"
+                >
+                  {/* Copy */}
+                  <div className={i % 2 === 1 ? "lg:order-2" : undefined}>
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`flex h-10 w-10 items-center justify-center rounded-xl ${ACCENT_TILE[item.accent]}`}
+                      >
+                        <item.icon className="h-5 w-5" />
+                      </span>
+                      <span className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+                        {item.eyebrow}
+                      </span>
+                    </div>
+                    <h3 className="mt-5 text-2xl font-semibold tracking-tight sm:text-3xl">
+                      {item.title}
+                    </h3>
+                    <p className="mt-4 text-lg text-muted-foreground">
+                      {item.body}
+                    </p>
+                    <ul className="mt-6 flex flex-col gap-2.5">
+                      {item.points.map((point) => (
+                        <li key={point} className="flex items-center gap-2.5 text-sm">
+                          <CheckIcon className="h-4 w-4 shrink-0 text-gold-600" />
+                          <span className="text-foreground/90">{point}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* App preview */}
+                  <div className={i % 2 === 1 ? "lg:order-1" : undefined}>
+                    <item.Mockup />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Secondary capabilities */}
+            <div className="mt-20 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {FEATURES.map((feature) => (
                 <div
                   key={feature.title}
@@ -265,47 +305,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Workflow */}
-        <section id="workflow" className="mx-auto w-full max-w-6xl px-6 py-20 lg:py-24">
-          <div className="max-w-2xl">
-            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              Up and running in three steps
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
-              No lengthy setup, no migration project. Create your organization
-              and invite your archers today.
-            </p>
-          </div>
-
-          <div className="mt-14 grid gap-8 md:grid-cols-3">
-            {WORKFLOW.map((item) => (
-              <div key={item.step} className="relative">
-                <span className="text-sm font-semibold text-gold-600">
-                  {item.step}
-                </span>
-                <h3 className="mt-3 text-xl font-semibold">{item.title}</h3>
-                <p className="mt-2 text-muted-foreground">{item.body}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-14 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-3">
-            {STATS.map((stat) => (
-              <div key={stat.label} className="bg-surface px-6 py-8 text-center">
-                <div className="text-4xl font-semibold tracking-tight">
-                  {stat.value}
-                  <span className="ml-1 text-lg font-medium text-muted-foreground">
-                    {stat.unit}
-                  </span>
-                </div>
-                <p className="mt-2 text-sm text-muted-foreground">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {/* Pricing */}
-        <section id="pricing" className="border-t border-border bg-muted">
+        <section id="pricing" className="border-t border-border">
           <div className="mx-auto w-full max-w-6xl px-6 py-20 lg:py-24">
             <div className="mx-auto max-w-2xl text-center">
               <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
