@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { SiteHeader } from "@/components/marketing/site-header";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { InterestForm } from "@/components/marketing/interest-form";
 import { buttonPrimary, buttonSecondary } from "@/components/ui/button-styles";
 import {
   ArrowRightIcon,
@@ -177,10 +178,13 @@ export default async function Home() {
     data: { user },
   } = await supabase.auth.getUser();
   const signedIn = Boolean(user);
+  // Public sign-in / signup is gated to local dev for now; everyone else sees
+  // the "Interested?" lead-capture flow instead.
+  const authEnabled = process.env.NODE_ENV === "development";
 
   return (
     <div className="flex flex-1 flex-col bg-background text-foreground">
-      <SiteHeader signedIn={signedIn} />
+      <SiteHeader signedIn={signedIn} authEnabled={authEnabled} />
 
       <main className="flex-1">
         {/* Hero */}
@@ -204,10 +208,14 @@ export default async function Home() {
                 spend more time on the line and less time on admin.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link href="/login" className={`${buttonPrimary} px-5 py-3 text-sm`}>
-                  Create your organization
-                  <ArrowRightIcon className="h-4 w-4" />
-                </Link>
+                {authEnabled ? (
+                  <Link href="/login" className={`${buttonPrimary} px-5 py-3 text-sm`}>
+                    Create your organization
+                    <ArrowRightIcon className="h-4 w-4" />
+                  </Link>
+                ) : (
+                  <InterestForm className={`${buttonPrimary} px-5 py-3 text-sm`} />
+                )}
                 <a href="#features" className={`${buttonSecondary} px-5 py-3 text-sm`}>
                   See features
                 </a>
@@ -354,14 +362,23 @@ export default async function Home() {
                       </li>
                     ))}
                   </ul>
-                  <Link
-                    href="/login"
-                    className={`mt-8 px-4 py-2.5 text-sm ${
-                      plan.highlight ? buttonPrimary : buttonSecondary
-                    }`}
-                  >
-                    {plan.cta}
-                  </Link>
+                  {authEnabled ? (
+                    <Link
+                      href="/login"
+                      className={`mt-8 px-4 py-2.5 text-sm ${
+                        plan.highlight ? buttonPrimary : buttonSecondary
+                      }`}
+                    >
+                      {plan.cta}
+                    </Link>
+                  ) : (
+                    <InterestForm
+                      label={plan.cta}
+                      className={`mt-8 px-4 py-2.5 text-sm ${
+                        plan.highlight ? buttonPrimary : buttonSecondary
+                      }`}
+                    />
+                  )}
                 </div>
               ))}
             </div>
@@ -419,11 +436,15 @@ export default async function Home() {
                 Create your organization in minutes and give your archers a home
                 worth showing up for.
               </p>
-              <div className="mt-8">
-                <Link href="/login" className={`${buttonPrimary} px-6 py-3 text-sm`}>
-                  Create your organization
-                  <ArrowRightIcon className="h-4 w-4" />
-                </Link>
+              <div className="mt-8 flex justify-center">
+                {authEnabled ? (
+                  <Link href="/login" className={`${buttonPrimary} px-6 py-3 text-sm`}>
+                    Create your organization
+                    <ArrowRightIcon className="h-4 w-4" />
+                  </Link>
+                ) : (
+                  <InterestForm className={`${buttonPrimary} px-6 py-3 text-sm`} />
+                )}
               </div>
             </div>
           </div>
