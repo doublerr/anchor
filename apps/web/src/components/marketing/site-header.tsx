@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { TargetMark } from "./icons";
 import { InterestForm } from "./interest-form";
-import { buttonPrimary } from "@/components/ui/button-styles";
+import { buttonPrimary, buttonSecondary } from "@/components/ui/button-styles";
 
 const NAV_LINKS = [
   { href: "#features", label: "Features" },
@@ -43,20 +43,27 @@ export function SiteHeader({
             <Link href="/dashboard" className={`${buttonPrimary} px-4 py-2 text-sm`}>
               Dashboard
             </Link>
-          ) : authEnabled ? (
-            <>
-              <Link
-                href="/login"
-                className="hidden text-sm font-medium text-muted-foreground transition hover:text-foreground sm:inline"
-              >
-                Sign in
-              </Link>
-              <Link href="/login" className={`${buttonPrimary} px-4 py-2 text-sm`}>
-                Get started
-              </Link>
-            </>
           ) : (
-            <InterestForm className={`${buttonPrimary} px-4 py-2 text-sm`} />
+            <>
+              {authEnabled ? (
+                <>
+                  <Link
+                    href="/login"
+                    className="hidden text-sm font-medium text-muted-foreground transition hover:text-foreground sm:inline"
+                  >
+                    Sign in
+                  </Link>
+                  <Link href="/login" className={`${buttonPrimary} px-4 py-2 text-sm`}>
+                    Get started
+                  </Link>
+                </>
+              ) : null}
+              <InterestForm
+                className={`${
+                  authEnabled ? buttonSecondary : buttonPrimary
+                } px-4 py-2 text-sm`}
+              />
+            </>
           )}
         </div>
       </div>

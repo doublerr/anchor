@@ -1,6 +1,7 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
+import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 import { buttonPrimary, buttonSecondary } from "@/components/ui/button-styles";
 
@@ -38,7 +39,11 @@ export function InterestForm({
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const titleId = useId();
+
+  // Portal target is only available in the browser.
+  useEffect(() => setMounted(true), []);
 
   function close() {
     setOpen(false);
@@ -90,21 +95,23 @@ export function InterestForm({
         {label}
       </button>
 
-      {open ? (
+      {open && mounted
+        ? createPortal(
         <div
           role="dialog"
           aria-modal="true"
           aria-labelledby={titleId}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 overflow-y-auto"
         >
           <button
             type="button"
             aria-label="Close"
             onClick={close}
-            className="absolute inset-0 bg-ink-900/50 backdrop-blur-sm"
+            className="fixed inset-0 bg-ink-900/50 backdrop-blur-sm"
           />
 
-          <div className="relative w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-xl">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div className="relative w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-xl">
             {status === "done" ? (
               <div className="text-center">
                 <h2 id={titleId} className="text-xl font-semibold">
@@ -218,9 +225,12 @@ export function InterestForm({
                 </div>
               </form>
             )}
+            </div>
           </div>
-        </div>
-      ) : null}
+        </div>,
+            document.body,
+          )
+        : null}
     </>
   );
 }

@@ -213,9 +213,12 @@ export default async function Home() {
                     Create your organization
                     <ArrowRightIcon className="h-4 w-4" />
                   </Link>
-                ) : (
-                  <InterestForm className={`${buttonPrimary} px-5 py-3 text-sm`} />
-                )}
+                ) : null}
+                <InterestForm
+                  className={`${
+                    authEnabled ? buttonSecondary : buttonPrimary
+                  } px-5 py-3 text-sm`}
+                />
                 <a href="#features" className={`${buttonSecondary} px-5 py-3 text-sm`}>
                   See features
                 </a>
@@ -371,14 +374,13 @@ export default async function Home() {
                     >
                       {plan.cta}
                     </Link>
-                  ) : (
-                    <InterestForm
-                      label={plan.cta}
-                      className={`mt-8 px-4 py-2.5 text-sm ${
-                        plan.highlight ? buttonPrimary : buttonSecondary
-                      }`}
-                    />
-                  )}
+                  ) : null}
+                  <InterestForm
+                    label={authEnabled ? "Interested?" : plan.cta}
+                    className={`${authEnabled ? "mt-3" : "mt-8"} px-4 py-2.5 text-sm ${
+                      plan.highlight ? buttonPrimary : buttonSecondary
+                    }`}
+                  />
                 </div>
               ))}
             </div>
@@ -436,15 +438,18 @@ export default async function Home() {
                 Create your organization in minutes and give your archers a home
                 worth showing up for.
               </p>
-              <div className="mt-8 flex justify-center">
+              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
                 {authEnabled ? (
                   <Link href="/login" className={`${buttonPrimary} px-6 py-3 text-sm`}>
                     Create your organization
                     <ArrowRightIcon className="h-4 w-4" />
                   </Link>
-                ) : (
-                  <InterestForm className={`${buttonPrimary} px-6 py-3 text-sm`} />
-                )}
+                ) : null}
+                <InterestForm
+                  className={`${
+                    authEnabled ? buttonSecondary : buttonPrimary
+                  } px-6 py-3 text-sm`}
+                />
               </div>
             </div>
           </div>
