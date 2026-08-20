@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
@@ -18,6 +18,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Anchor",
   description: "Archery club management software",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#22242F",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

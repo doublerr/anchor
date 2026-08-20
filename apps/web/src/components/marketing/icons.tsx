@@ -1,8 +1,10 @@
 import type { SVGProps } from "react";
 
 /**
- * Anchor's brand mark: an archery target seen head-on. Rings use
- * `currentColor` so it inherits text color, with the gold center called out.
+ * Anchor's brand mark: the "Bullseye Monogram" — a target ring in
+ * `currentColor` (so it inherits text color) around a gold center with the
+ * Anchor "A" set in it. The center is always gold, so the ink "A" stays legible
+ * in both light and dark. Geometry matches the shipped favicon / app icons.
  */
 export function TargetMark({
   className,
@@ -10,15 +12,30 @@ export function TargetMark({
 }: SVGProps<SVGSVGElement>) {
   return (
     <svg
-      viewBox="0 0 24 24"
+      viewBox="0 0 100 100"
       fill="none"
       aria-hidden="true"
       className={className}
       {...props}
     >
-      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="12" cy="12" r="6.25" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="12" cy="12" r="2.5" className="fill-gold-400" />
+      {/* Outer ring (annulus 31→42) drawn as a thick stroke. */}
+      <circle
+        cx="50"
+        cy="50"
+        r="36.5"
+        stroke="currentColor"
+        strokeWidth="11"
+      />
+      {/* Gold center. */}
+      <circle cx="50" cy="50" r="20" className="fill-gold-400" />
+      {/* The "A", always sitting on gold. */}
+      <path
+        d="M39 62 L50 33 L61 62 M44 50.5 L56 50.5"
+        className="stroke-ink-900"
+        strokeWidth="4.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
