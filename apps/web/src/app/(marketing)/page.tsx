@@ -38,6 +38,28 @@ const faqStructuredData = {
   })),
 };
 
+// The three promises behind Anchor — echoed as pillars right under the hero.
+const VALUES = [
+  {
+    icon: BowIcon,
+    accent: "gold",
+    title: "Built by archers, for archers",
+    body: "World-class tools shaped by people who shoot — so archers and coaches spend less time managing and more time on the line.",
+  },
+  {
+    icon: ScoreIcon,
+    accent: "aqua",
+    title: "Delight your students",
+    body: "Effortless from day one — signup, payments, smart scoring, and personal-best tracking your students actually enjoy using.",
+  },
+  {
+    icon: MembersIcon,
+    accent: "coral",
+    title: "Grow your community",
+    body: "Bring archers together and keep them coming back, turning a roster of names into a club that feels like home.",
+  },
+] as const;
+
 // Tinted tile styles for feature icons, rotating through the brand accents.
 const ACCENT_TILE = {
   gold: "bg-gold-100 text-gold-700 dark:bg-gold-400/15 dark:text-gold-300",
@@ -81,21 +103,25 @@ const SHOWCASE = [
 const FEATURES = [
   {
     icon: BellIcon,
+    image: "https://mybygkpquxjdklfhspzp.supabase.co/storage/v1/object/public/primary_content/email_comms.png",
+    imageFit: "contain",
     accent: "gold",
     title: "Communications",
     body: "Reach members over email, SMS, browser push, and WhatsApp — announcements, reminders, and nudges.",
   },
   {
     icon: CardIcon,
+    image: "https://mybygkpquxjdklfhspzp.supabase.co/storage/v1/object/public/primary_content/bow_with_labels.jpeg",
     accent: "aqua",
     title: "Payments & gear",
     body: "Collect dues and fees through Stripe and Zelle, and point new archers to recommended gear lists.",
   },
   {
     icon: BowIcon,
+    image: "https://mybygkpquxjdklfhspzp.supabase.co/storage/v1/object/public/primary_content/archer_with_arrows.jpg",
     accent: "coral",
     title: "Archer lockers",
-    body: "Give each archer private video and media hosting plus saved bow settings they carry season to season.",
+    body: "Give each archer private video and media hosting with coaching notes plus saved bow settings they carry season to season.",
   },
 ] as const;
 
@@ -206,9 +232,9 @@ export default function Home() {
                 Run your archery club without the busywork.
               </h1>
               <p className="mt-6 max-w-lg text-lg text-muted-foreground">
-                Anchor brings your roster, scores, practice schedule, and
-                competitions together in one clean, shared home — so you can
-                spend more time on the line and less time on admin.
+                World-class tools built by archers: coach more and manage less,
+                delight your students with software they love, and grow a real
+                community around your club.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 {authEnabled ? (
@@ -241,6 +267,25 @@ export default function Home() {
                 aria-hidden
                 className="absolute top-1/2 left-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink-900"
               />
+            </div>
+          </div>
+
+          {/* Value pillars — the three promises behind Anchor */}
+          <div className="relative mx-auto w-full max-w-6xl px-6 pb-20 lg:pb-24">
+            <div className="grid gap-6 border-t border-border pt-12 sm:grid-cols-3">
+              {VALUES.map((value) => (
+                <div key={value.title}>
+                  <div
+                    className={`flex h-11 w-11 items-center justify-center rounded-xl ${ACCENT_TILE[value.accent]}`}
+                  >
+                    <value.icon className="h-6 w-6" />
+                  </div>
+                  <h2 className="mt-5 text-lg font-semibold">{value.title}</h2>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    {value.body}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -306,17 +351,32 @@ export default function Home() {
               {FEATURES.map((feature) => (
                 <div
                   key={feature.title}
-                  className="rounded-2xl border border-border bg-surface p-6 transition hover:-translate-y-0.5 hover:shadow-sm"
+                  className="flex h-80 flex-col overflow-hidden rounded-2xl border border-border bg-surface transition hover:-translate-y-0.5 hover:shadow-sm"
                 >
                   <div
-                    className={`flex h-11 w-11 items-center justify-center rounded-xl ${ACCENT_TILE[feature.accent]}`}
+                    className={`flex h-2/5 w-full items-center justify-center overflow-hidden ${ACCENT_TILE[feature.accent]}`}
                   >
-                    <feature.icon className="h-6 w-6" />
+                    {"image" in feature ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={feature.image}
+                        alt=""
+                        className={`h-full w-full ${
+                          "imageFit" in feature && feature.imageFit === "contain"
+                            ? "object-contain"
+                            : "object-cover"
+                        }`}
+                      />
+                    ) : (
+                      <feature.icon className="h-10 w-10" />
+                    )}
                   </div>
-                  <h3 className="mt-5 text-lg font-semibold">{feature.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    {feature.body}
-                  </p>
+                  <div className="p-6">
+                    <h3 className="text-lg font-semibold">{feature.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {feature.body}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
