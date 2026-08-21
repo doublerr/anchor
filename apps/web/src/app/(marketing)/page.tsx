@@ -17,11 +17,25 @@ import {
   ScoreIcon,
   TargetMark,
 } from "@/components/marketing/icons";
+import { FAQ, SITE_TAGLINE } from "@/lib/site";
 
 export const metadata = {
-  title: "Anchor · Archery club & team management",
+  title: SITE_TAGLINE,
   description:
     "Anchor is the all-in-one platform for archery clubs and teams — manage members, track scores, schedule practice, and run competitions.",
+  alternates: { canonical: "/" },
+};
+
+// FAQ structured data (schema.org FAQPage). Google surfaces this as rich
+// results and generative AI engines extract the answers directly.
+const faqStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQ.map((item) => ({
+    "@type": "Question",
+    name: item.q,
+    acceptedAnswer: { "@type": "Answer", text: item.a },
+  })),
 };
 
 // Tinted tile styles for feature icons, rotating through the brand accents.
@@ -172,6 +186,10 @@ export default function Home() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}
+      />
       {/* Hero */}
         <section className="relative overflow-hidden">
           <div
@@ -408,6 +426,33 @@ export default function Home() {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ — also emitted as FAQPage structured data below */}
+        <section id="faq" className="border-t border-border bg-muted">
+          <div className="mx-auto w-full max-w-3xl px-6 py-20 lg:py-24">
+            <div className="text-center">
+              <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                Frequently asked questions
+              </h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                Everything you need to know about running your club on Anchor.
+              </p>
+            </div>
+            <div className="mt-12 divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface">
+              {FAQ.map((item) => (
+                <details key={item.q} className="group px-6 py-5">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left text-base font-medium text-foreground">
+                    {item.q}
+                    <ArrowRightIcon className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90" />
+                  </summary>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                    {item.a}
+                  </p>
+                </details>
+              ))}
             </div>
           </div>
         </section>

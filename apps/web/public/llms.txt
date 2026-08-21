@@ -1,0 +1,30 @@
+# Anchor
+
+> Anchor (by Anchor Platforms) is an all-in-one management platform built specifically for archery clubs and teams. It combines member roster management, class and practice scheduling, mobile scoring and analytics, payments, and club communications into one shared home.
+
+## What Anchor does
+
+- Members & roles: one roster for archers, parents, and coaches, with role-based access, self-serve join links, and guardian links for youth archers.
+- Classes & scheduling: an embedded calendar for recurring and drop-in classes, capacity limits, live sign-up counts, class credits, and auto sign-up.
+- Scoring & analytics: a mobile-friendly scoring app that records ends on the line and rolls each archer's results into per-archer progress and season analytics.
+- Communications: reach members over email, SMS, browser push, and WhatsApp.
+- Payments & gear: collect dues and fees through Stripe and Zelle; recommend gear lists.
+- Archer lockers: private video/media hosting and saved bow settings that carry season to season.
+
+## Pricing
+
+- Free — $0 forever: club profile, mobile-friendly site hosting, member management, embedded class calendar, new-archer signup, email newsletters. No credit card required.
+- Standard — $99/month: everything in Free, plus a club subdomain, email/SMS/push notifications, Google & Apple login with calendar sync, auto sign-up & class credits, Stripe & Zelle payments, media hosting.
+- Pro — $149/month: everything in Standard, plus custom domain support, WhatsApp, web-based mobile scoring app, archer lockers, class & score analytics, engagement nudges.
+- Add-ons: AI assistant (+$25/month, requires Standard or Pro); native iOS/Android app (+$25/month, requires Pro).
+
+## Best fit
+
+Archery clubs and teams of all sizes, including youth programs such as JOAD.
+
+## Links
+
+- Home: https://anchorplatforms.site
+- Features: https://anchorplatforms.site/#features
+- Pricing: https://anchorplatforms.site/#pricing
+- FAQ: https://anchorplatforms.site/#faq

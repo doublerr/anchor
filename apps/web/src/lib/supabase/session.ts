@@ -5,8 +5,20 @@ import { supabaseEnv } from "./config";
 /** Path prefixes reachable without a session (auth forms + callbacks). */
 const PUBLIC_PATHS = ["/login", "/signup", "/auth"];
 
-/** Exact paths reachable without a session (public marketing pages). */
-const PUBLIC_EXACT_PATHS = ["/"];
+/**
+ * Exact paths reachable without a session: the public marketing page plus the
+ * SEO / metadata endpoints crawlers must reach (robots, sitemap, llms.txt,
+ * the generated web manifest, and the Open Graph share image). Without these,
+ * the auth redirect would bounce every crawler to /login.
+ */
+const PUBLIC_EXACT_PATHS = [
+  "/",
+  "/robots.txt",
+  "/sitemap.xml",
+  "/llms.txt",
+  "/manifest.webmanifest",
+  "/opengraph-image",
+];
 
 /**
  * Refreshes the Supabase auth session on every request and redirects

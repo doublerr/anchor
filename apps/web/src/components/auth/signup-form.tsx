@@ -1,11 +1,7 @@
 import Link from "next/link";
 import { signup } from "@/app/(marketing)/signup/actions";
 import { buttonPrimary } from "@/components/ui/button-styles";
-
-const fieldClass =
-  "rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-gold-400 focus:ring-2 focus:ring-gold-400/30";
-
-const labelClass = "flex flex-col gap-1 text-sm font-medium text-foreground";
+import { fieldClass, labelClass } from "@/components/ui/field-styles";
 
 /**
  * Organization onboarding form. The signer creates their organization and
@@ -30,6 +26,8 @@ export function SignupForm({ error }: { error?: string }) {
           name="organization_name"
           type="text"
           required
+          minLength={2}
+          maxLength={100}
           placeholder="e.g. Riverside Archery Club"
           className={fieldClass}
         />

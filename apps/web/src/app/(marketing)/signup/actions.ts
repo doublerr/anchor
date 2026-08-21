@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { validateOrgName } from "@/lib/slug";
 
 /**
  * Organization signup. The person signing up here is setting up an
@@ -19,6 +20,13 @@ export async function signup(formData: FormData) {
   const organizationName = String(formData.get("organization_name") ?? "").trim();
   const fullName = String(formData.get("full_name") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
+
+  // The org's URL slug is generated in the DB trigger from this name; enforce
+  // sane length limits here so it always has something usable to slugify.
+  const nameError = validateOrgName(organizationName);
+  if (nameError) {
+    redirect(`/signup?error=${encodeURIComponent(nameError)}`);
+  }
 
   const { data, error } = await supabase.auth.signUp({
     email: String(formData.get("email")),

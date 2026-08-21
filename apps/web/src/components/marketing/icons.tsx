@@ -150,3 +150,59 @@ export function ArrowRightIcon(props: IconProps) {
     </svg>
   );
 }
+
+export function HomeIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 11.5 12 4l8 7.5" />
+      <path d="M6 10v9h12v-9" />
+      <path d="M10 19v-5h4v5" />
+    </svg>
+  );
+}
+
+export function MapPinIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 21c4-4.5 7-7.9 7-11a7 7 0 1 0-14 0c0 3.1 3 6.5 7 11Z" />
+      <circle cx="12" cy="10" r="2.5" />
+    </svg>
+  );
+}
+
+export function SettingsIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 2.5v2.5M12 19v2.5M21.5 12H19M5 12H2.5M18.7 5.3l-1.8 1.8M7.1 16.9l-1.8 1.8M18.7 18.7l-1.8-1.8M7.1 7.1 5.3 5.3" />
+    </svg>
+  );
+}
+
+export function PlusIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </svg>
+  );
+}
+
+export function LockIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="5" y="11" width="14" height="9" rx="2" />
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+    </svg>
+  );
+}
+
+export function LogoutIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M15 4h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-3" />
+      <path d="M10 12H3" />
+      <path d="M6 8l-3 4 3 4" />
+    </svg>
+  );
+}

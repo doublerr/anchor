@@ -9,6 +9,10 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 <!-- END:nextjs-agent-rules -->
 
 
+# Development
+
+Do not use your built-in browser when directly working with the user (subagents can still use it). Instead use the devcontainer and docker exec to control it.
+
 # Conventions
 
 NextJS

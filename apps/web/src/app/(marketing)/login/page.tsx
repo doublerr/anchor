@@ -28,7 +28,10 @@ export default async function LoginPage({
           </p>
         </div>
 
-        <form className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-6 shadow-sm">
+        <form
+          action={login}
+          className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-6 shadow-sm"
+        >
           {message ? (
             <p className="rounded-md bg-aqua-100 px-3 py-2 text-sm text-aqua-700 dark:bg-aqua-400/15 dark:text-aqua-300">
               {message}
@@ -64,7 +67,7 @@ export default async function LoginPage({
           </label>
 
           <button
-            formAction={login}
+            type="submit"
             className={`${buttonPrimary} mt-2 px-3 py-2 text-sm`}
           >
             Sign in
