@@ -356,20 +356,16 @@ export default function Home() {
                   <div
                     className={`flex h-2/5 w-full items-center justify-center overflow-hidden ${ACCENT_TILE[feature.accent]}`}
                   >
-                    {"image" in feature ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={feature.image}
-                        alt=""
-                        className={`h-full w-full ${
-                          "imageFit" in feature && feature.imageFit === "contain"
-                            ? "object-contain"
-                            : "object-cover"
-                        }`}
-                      />
-                    ) : (
-                      <feature.icon className="h-10 w-10" />
-                    )}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={feature.image}
+                      alt=""
+                      className={`h-full w-full ${
+                        "imageFit" in feature && feature.imageFit === "contain"
+                          ? "object-contain"
+                          : "object-cover"
+                      }`}
+                    />
                   </div>
                   <div className="p-6">
                     <h3 className="text-lg font-semibold">{feature.title}</h3>
