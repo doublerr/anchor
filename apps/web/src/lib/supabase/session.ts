@@ -1,9 +1,25 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { supabaseEnv } from "./config";
+import { RESERVED_SLUGS } from "@/lib/slug";
 
 /** Path prefixes reachable without a session (auth forms + callbacks). */
 const PUBLIC_PATHS = ["/login", "/signup", "/auth"];
+
+const SLUG_SEGMENT = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
+
+/**
+ * Whether `pathname` addresses a public club site (`/{slug}` or `/{slug}/…`).
+ * These render without a session, so the auth gate must let them through. A
+ * reserved segment (which covers every app/auth/marketing route) is never a
+ * public slug; the `[slug]` route itself 404s slugs with no published org.
+ */
+function isPublicSitePath(pathname: string): boolean {
+  const first = pathname.split("/")[1]?.toLowerCase() ?? "";
+  if (!first) return false;
+  if (RESERVED_SLUGS.has(first)) return false;
+  return SLUG_SEGMENT.test(first);
+}
 
 /**
  * Exact paths reachable without a session: the public marketing page plus the
@@ -55,7 +71,8 @@ export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isPublic =
     PUBLIC_EXACT_PATHS.includes(pathname) ||
-    PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+    PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`)) ||
+    isPublicSitePath(pathname);
 
   if (!user && !isPublic) {
     const redirectUrl = request.nextUrl.clone();

@@ -11,6 +11,8 @@ import {
   ArrowRightIcon,
 } from "@/components/marketing/icons";
 import { buttonPrimary, buttonSecondary } from "@/components/ui/button-styles";
+import { SetupChecklist } from "@/components/dashboard/setup-checklist";
+import { ShareSite } from "@/components/dashboard/share-site";
 
 export const metadata = {
   title: "Overview · Anchor",
@@ -61,6 +63,7 @@ export default async function Dashboard() {
     ]);
 
   const firstName = profile?.full_name?.split(" ")[0];
+  const siteComplete = Boolean(org.site_completed_at);
 
   const stats = [
     {
@@ -93,6 +96,12 @@ export default async function Dashboard() {
         <p className="text-muted-foreground">
           Here&rsquo;s what&rsquo;s happening at {org.name}.
         </p>
+      </div>
+
+      {/* Getting-started checklist (hidden once every step is done) */}
+      <div className="mt-8">
+        <SetupChecklist siteComplete={siteComplete} />
+        {siteComplete ? <ShareSite slug={org.slug} /> : null}
       </div>
 
       {/* Stat cards */}

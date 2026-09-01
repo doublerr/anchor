@@ -13,13 +13,32 @@ export const SLUG_MAX = 63;
 export const ORG_NAME_MIN = 2;
 export const ORG_NAME_MAX = 100;
 
-/** Slugs reserved for routing / infra — mirror of public.reserved_slugs(). */
+/**
+ * Slugs reserved for routing / infra so a club can never take a name that
+ * collides with the marketing site, the app, auth, or crawler endpoints.
+ * Mirror of public.reserved_slugs() — keep the two in sync.
+ */
 export const RESERVED_SLUGS = new Set([
-  "www", "app", "admin", "api", "auth", "login", "signup", "onboarding",
-  "dashboard", "settings", "members", "locations", "account", "billing",
-  "mail", "ftp", "blog", "help", "support", "status", "staging", "dev",
-  "test", "assets", "static", "cdn", "root", "anchor", "about", "pricing",
-  "terms", "privacy",
+  // Infrastructure & system
+  "www", "app", "admin", "api", "cdn", "assets", "static", "mail", "ftp",
+  "root", "dev", "staging", "test", "status",
+  // Metadata / crawler endpoints (served at the apex)
+  "robots", "sitemap", "manifest", "favicon", "icon", "apple-icon",
+  "opengraph-image", "llms", "feed", "rss",
+  // Auth & account
+  "auth", "login", "logout", "signin", "signout", "signup", "register",
+  "join", "invite", "onboarding", "account", "billing", "verify", "reset",
+  "password", "confirm", "email", "me", "profile", "user", "users",
+  "notifications", "settings",
+  // App routes
+  "dashboard", "overview", "members", "locations", "site",
+  "create-organization", "new", "search", "explore",
+  // Marketing & company
+  "about", "pricing", "features", "faq", "contact", "home", "product",
+  "docs", "resources", "company", "careers", "legal", "security", "privacy",
+  "terms", "cookies", "integrations", "changelog", "roadmap", "demo",
+  "download", "enterprise", "sales", "partners", "press", "blog", "help",
+  "support", "anchor",
 ]);
 
 const SLUG_PATTERN = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;

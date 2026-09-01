@@ -7,6 +7,7 @@ import {
   HomeIcon,
   MembersIcon,
   MapPinIcon,
+  GlobeIcon,
   SettingsIcon,
 } from "@/components/marketing/icons";
 
@@ -21,6 +22,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "Overview", Icon: HomeIcon },
   { href: "/members", label: "Members", Icon: MembersIcon },
   { href: "/locations", label: "Locations", Icon: MapPinIcon },
+  { href: "/site", label: "Public site", Icon: GlobeIcon },
   { href: "/settings", label: "Settings", Icon: SettingsIcon },
 ];
 

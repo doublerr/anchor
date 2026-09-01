@@ -12,8 +12,8 @@ export const config = {
   matcher: [
     /*
      * Run on all paths except static assets and image files, so auth
-     * redirects never block CSS/JS/images:
+     * redirects never block CSS/JS/images or static .html assets:
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|html)$).*)",
   ],
 };

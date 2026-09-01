@@ -1,6 +1,27 @@
 @import "tailwindcss";
 
 /*
+ * Public club sites use a MANUAL color mode (default dark) via `data-club-theme`
+ * on their root, instead of the OS preference the rest of the app follows.
+ *
+ * The `dark:` variant is redefined so it still tracks the OS preference for
+ * normal app elements, but inside a club subtree it follows `data-club-theme`:
+ *   - a `[data-club-theme="dark"]` subtree always gets dark styles,
+ *   - a `[data-club-theme="light"]` subtree never does (even on a dark OS).
+ * Elements outside any club subtree behave exactly as before.
+ */
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    &:not([data-club-theme="light"]):not([data-club-theme="light"] *) {
+      @slot;
+    }
+  }
+  &:where([data-club-theme="dark"], [data-club-theme="dark"] *) {
+    @slot;
+  }
+}
+
+/*
  * Anchor design tokens.
  *
  * Brand palette (fixed across light/dark) — drawn from the archery target:
@@ -78,6 +99,43 @@
     --muted-foreground: #9195a5;
     --border: #2b2e3b;
   }
+}
+
+/*
+ * Public club site — manual color mode. These override the semantic tokens
+ * within the club subtree, winning over the inherited :root / OS-dark values.
+ * Dark mirrors the app's dark palette; light is an almost-white ground with the
+ * archery-target accent colors (gold / aqua / coral / ink) carrying the color.
+ */
+[data-club-theme="dark"] {
+  --background: #16171e;
+  --surface: #1e2029;
+  --muted: #23252f;
+  --foreground: #f3f3f3;
+  --muted-foreground: #9195a5;
+  --border: #2b2e3b;
+  color-scheme: dark;
+}
+[data-club-theme="light"] {
+  --background: #fafafa;
+  --surface: #ffffff;
+  --muted: #f1f2f5;
+  --foreground: #1e2029;
+  --muted-foreground: #565a6e;
+  --border: #e6e7ec;
+  color-scheme: light;
+}
+
+/* Theme-toggle icons: show the one for the mode you'd switch INTO. */
+.club-theme-sun,
+.club-theme-moon {
+  display: none;
+}
+[data-club-theme="dark"] .club-theme-sun {
+  display: block;
+}
+[data-club-theme="light"] .club-theme-moon {
+  display: block;
 }
 
 @theme inline {

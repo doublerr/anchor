@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { InterestForm } from "@/components/marketing/interest-form";
+import { HeroGame } from "@/components/marketing/hero-game";
 import { buttonPrimary, buttonSecondary } from "@/components/ui/button-styles";
 import {
   RosterMockup,
@@ -195,16 +196,6 @@ const ADDONS = [
   },
 ];
 
-// Concentric target rings (outer → in). Gaps use the surface token so the
-// bullseye stays crisp in both light and dark themes.
-const TARGET_RINGS = [
-  "inset-0 bg-ink-900 dark:bg-ink-100",
-  "inset-[11%] bg-surface",
-  "inset-[22%] bg-aqua-400",
-  "inset-[33%] bg-coral-400",
-  "inset-[42%] bg-gold-400",
-];
-
 export default function Home() {
   // Public sign-in / signup is gated to local dev for now; everyone else sees
   // the "Interested?" lead-capture flow instead.
@@ -257,17 +248,8 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Target motif */}
-            <div className="relative mx-auto aspect-square w-full max-w-[260px] sm:max-w-xs lg:max-w-sm">
-              <div className="absolute inset-0 rounded-full bg-muted" />
-              {TARGET_RINGS.map((cls) => (
-                <div key={cls} className={`absolute rounded-full ${cls}`} aria-hidden />
-              ))}
-              <div
-                aria-hidden
-                className="absolute top-1/2 left-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink-900"
-              />
-            </div>
+            {/* Playable archery mini-game (replaces the static target motif) */}
+            <HeroGame />
           </div>
 
           {/* Value pillars — the three promises behind Anchor */}
