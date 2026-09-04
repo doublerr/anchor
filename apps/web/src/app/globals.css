@@ -104,8 +104,11 @@
 /*
  * Public club site — manual color mode. These override the semantic tokens
  * within the club subtree, winning over the inherited :root / OS-dark values.
- * Dark mirrors the app's dark palette; light is an almost-white ground with the
- * archery-target accent colors (gold / aqua / coral / ink) carrying the color.
+ *
+ * The default is `auto`: a club site follows the visitor's OS preference on a
+ * first visit (matching how nearly every other local club/rec site behaves) and
+ * only pins a mode once the visitor uses the toggle. `auto` deliberately sets
+ * no variables here — it inherits the :root / prefers-color-scheme values above.
  */
 [data-club-theme="dark"] {
   --background: #16171e;
@@ -137,6 +140,137 @@
 [data-club-theme="light"] .club-theme-moon {
   display: block;
 }
+/* Under `auto` the OS preference decides which icon is the "switch into" one. */
+[data-club-theme="auto"] .club-theme-moon {
+  display: block;
+}
+@media (prefers-color-scheme: dark) {
+  [data-club-theme="auto"] .club-theme-moon {
+    display: none;
+  }
+  [data-club-theme="auto"] .club-theme-sun {
+    display: block;
+  }
+}
+
+/*
+ * Club brand accent.
+ *
+ * Each club picks one named accent (organizations.accent_color) so no two club
+ * sites read as the same template. Every accent declares its values explicitly
+ * rather than deriving them from a ramp, because the pairs that matter —
+ * fill/on-fill and accent-text/background — each have to clear WCAG AA on their
+ * own, and a mechanical ramp step doesn't guarantee that.
+ *
+ *   --a-fill / --a-on   solid accent surface and the text that sits on it
+ *   --a-text-*          accent-colored text ON the page background (per theme)
+ *   --a-soft-*          tinted surface for chips and icon tiles (per theme)
+ *
+ * Gold is the default when a club hasn't chosen (and for a null column).
+ */
+#club-root {
+  --a-fill: #ffd257;
+  --a-fill-hover: #ffdd7e;
+  --a-on: #1e2029;
+  --a-text-light: #a97b10;
+  --a-text-dark: #ffdd7e;
+  --a-soft-light: #fff3d4;
+  --a-soft-dark: rgb(255 210 87 / 0.16);
+}
+#club-root[data-club-accent="aqua"] {
+  --a-fill: #65def1;
+  --a-fill-hover: #8fe9f6;
+  --a-on: #16171e;
+  --a-text-light: #0e6e7e;
+  --a-text-dark: #8fe9f6;
+  --a-soft-light: #d2f5fb;
+  --a-soft-dark: rgb(101 222 241 / 0.16);
+}
+#club-root[data-club-accent="coral"] {
+  --a-fill: #d92020;
+  --a-fill-hover: #f53b3b;
+  --a-on: #ffffff;
+  --a-text-light: #a91414;
+  --a-text-dark: #ff8585;
+  --a-soft-light: #ffdcdc;
+  --a-soft-dark: rgb(255 91 91 / 0.16);
+}
+#club-root[data-club-accent="forest"] {
+  --a-fill: #15653f;
+  --a-fill-hover: #1a7f4f;
+  --a-on: #ffffff;
+  --a-text-light: #12583a;
+  --a-text-dark: #6fd39e;
+  --a-soft-light: #dcf3e7;
+  --a-soft-dark: rgb(111 211 158 / 0.16);
+}
+#club-root[data-club-accent="slate"] {
+  --a-fill: #3f4356;
+  --a-fill-hover: #565a6e;
+  --a-on: #f3f3f3;
+  --a-text-light: #3f4356;
+  --a-text-dark: #b9bcc7;
+  --a-soft-light: #e9eaee;
+  --a-soft-dark: rgb(185 188 199 / 0.14);
+}
+
+/*
+ * Map the accent to its semantic roles. Only the two theme-dependent roles need
+ * re-stating per mode, so this stays two small blocks however many accents
+ * exist. Order matters: the explicit `[data-club-theme]` blocks come last so a
+ * visitor's toggle beats the OS preference.
+ */
+#club-root {
+  --club-accent: var(--a-fill);
+  --club-accent-hover: var(--a-fill-hover);
+  --club-accent-contrast: var(--a-on);
+  --club-accent-text: var(--a-text-light);
+  --club-accent-soft: var(--a-soft-light);
+}
+@media (prefers-color-scheme: dark) {
+  #club-root:not([data-club-theme="light"]) {
+    --club-accent-text: var(--a-text-dark);
+    --club-accent-soft: var(--a-soft-dark);
+  }
+}
+#club-root[data-club-theme="dark"] {
+  --club-accent-text: var(--a-text-dark);
+  --club-accent-soft: var(--a-soft-dark);
+}
+#club-root[data-club-theme="light"] {
+  --club-accent-text: var(--a-text-light);
+  --club-accent-soft: var(--a-soft-light);
+}
+
+/*
+ * Club type scale. Information sites want a much larger display size than the
+ * app's UI scale, and fluid clamps avoid a shelf of breakpoint overrides on
+ * every heading.
+ */
+#club-root {
+  --club-display: clamp(2.25rem, 1.35rem + 4vw, 4.25rem);
+  --club-h1: clamp(1.875rem, 1.35rem + 2.4vw, 3rem);
+  --club-h2: clamp(1.5rem, 1.2rem + 1.4vw, 2.25rem);
+  --club-h3: clamp(1.125rem, 1.05rem + 0.4vw, 1.375rem);
+  --club-lede: clamp(1.0625rem, 1rem + 0.4vw, 1.3125rem);
+}
+
+/* Anything a club visitor can tap clears the 44px comfortable-target floor. */
+.club-tap {
+  min-height: 44px;
+}
+
+/* Respect a reduced-motion preference across the whole club site. */
+@media (prefers-reduced-motion: reduce) {
+  #club-root *,
+  #club-root *::before,
+  #club-root *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 
 @theme inline {
   --color-background: var(--background);
@@ -145,6 +279,18 @@
   --color-foreground: var(--foreground);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
+  /* Club accent, so the public-site components can use `bg-club-accent`,
+     `text-club-accent-text`, `bg-club-accent-soft` etc. */
+  --color-club-accent: var(--club-accent);
+  --color-club-accent-hover: var(--club-accent-hover);
+  --color-club-accent-contrast: var(--club-accent-contrast);
+  --color-club-accent-text: var(--club-accent-text);
+  --color-club-accent-soft: var(--club-accent-soft);
+  --text-club-display: var(--club-display);
+  --text-club-h1: var(--club-h1);
+  --text-club-h2: var(--club-h2);
+  --text-club-h3: var(--club-h3);
+  --text-club-lede: var(--club-lede);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

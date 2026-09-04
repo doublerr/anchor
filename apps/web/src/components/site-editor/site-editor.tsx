@@ -16,11 +16,16 @@ import {
   emptyProgram,
   emptyTestimonial,
 } from "@/lib/site-content";
+import { ACCENT_COLORS } from "@/lib/org";
 import { saveSite, type SiteContentPayload } from "@/app/(app)/site/actions";
 import { ShareSite } from "@/components/dashboard/share-site";
+import { ReadinessPanel } from "@/components/site-editor/readiness-panel";
+import { siteIsReady } from "@/lib/site-essentials";
 import type {
+  AccentColor,
   EventItem,
   Faq,
+  GalleryImage,
   Highlight,
   OrgTeamMember,
   PricingItem,
@@ -43,6 +48,7 @@ const SOCIAL_FIELDS: [keyof SocialLinks, string][] = [
 /** Editor tabs — one per major public-site section. */
 const TABS = [
   { id: "home", label: "Home" },
+  { id: "design", label: "Design" },
   { id: "about", label: "About page" },
   { id: "team", label: "Team" },
   { id: "programs", label: "Programs" },
@@ -59,11 +65,17 @@ export function SiteEditor({
   orgId,
   slug,
   initial,
+  description,
   teamMembers,
 }: {
   orgId: string;
   slug: string;
   initial: SiteContentPayload;
+  /**
+   * The org's onboarding description. Not editable here, but the public About
+   * section falls back to it, so readiness has to account for it.
+   */
+  description: string;
   teamMembers: OrgTeamMember[];
 }) {
   const [c, setC] = useState<SiteContentPayload>(initial);
@@ -71,6 +83,10 @@ export function SiteEditor({
   const [error, setError] = useState<string>();
   const [saved, setSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  // What the readiness gate sees: the live editor state plus the description
+  // the editor doesn't own.
+  const readiness = { ...c, description };
 
   function set<K extends keyof SiteContentPayload>(
     key: K,
@@ -115,6 +131,8 @@ export function SiteEditor({
         </p>
       </div>
 
+      <ReadinessPanel content={readiness} onGoToTab={setTab} />
+
       {error ? (
         <p className="rounded-md bg-coral-100 px-3 py-2 text-sm text-coral-700 dark:bg-coral-400/15 dark:text-coral-300">
           {error}
@@ -151,12 +169,6 @@ export function SiteEditor({
           value={c.tagline}
           onChange={(v) => set("tagline", v)}
           placeholder="Now is a great time to learn archery"
-        />
-        <ImageField
-          label="Hero image"
-          value={c.hero_image_url}
-          onUpload={uploadImage}
-          onChange={(v) => set("hero_image_url", v)}
         />
         <TextArea
           label="About"
@@ -217,6 +229,39 @@ export function SiteEditor({
               />
             </div>
           )}
+        />
+      </Card>
+
+        </>
+      ) : null}
+
+      {tab === "design" ? (
+        <>
+      <Card
+        title="Brand accent"
+        description="Your accent color runs through buttons, links and highlights on your public page."
+      >
+        <AccentPicker
+          value={c.accent_color}
+          onChange={(v) => set("accent_color", v)}
+        />
+      </Card>
+
+      <Card
+        title="Photos"
+        description="Large photos do more for a club page than any amount of copy. The hero fills the top of your page; the about photo sits beside your story."
+      >
+        <ImageField
+          label="Hero image"
+          value={c.hero_image_url}
+          onUpload={uploadImage}
+          onChange={(v) => set("hero_image_url", v)}
+        />
+        <ImageField
+          label="About photo"
+          value={c.about_image_url}
+          onUpload={uploadImage}
+          onChange={(v) => set("about_image_url", v)}
         />
       </Card>
 
@@ -290,6 +335,12 @@ export function SiteEditor({
           onChange={(rows) => set("programs", rows)}
           render={(row, update) => (
             <div className="flex flex-col gap-3">
+              <ImageField
+                label="Photo"
+                value={row.image_url ?? ""}
+                onUpload={uploadImage}
+                onChange={(v) => update({ image_url: v })}
+              />
               <div className="grid gap-3 sm:grid-cols-2">
                 <TextField
                   label="Name"
@@ -379,6 +430,17 @@ export function SiteEditor({
                   placeholder="Equipment included"
                 />
               </div>
+              <label className="flex items-center gap-3 text-sm font-medium text-foreground">
+                <input
+                  type="checkbox"
+                  checked={row.featured ?? false}
+                  onChange={(e) =>
+                    update({ featured: e.target.checked } as Partial<PricingItem>)
+                  }
+                  className="h-4 w-4 rounded border-border text-gold-500 focus:ring-gold-400"
+                />
+                Highlight as &ldquo;most popular&rdquo;
+              </label>
             </div>
           )}
         />
@@ -398,6 +460,12 @@ export function SiteEditor({
           onChange={(rows) => set("events", rows)}
           render={(row, update) => (
             <div className="flex flex-col gap-3">
+              <ImageField
+                label="Photo"
+                value={row.image_url ?? ""}
+                onUpload={uploadImage}
+                onChange={(v) => update({ image_url: v })}
+              />
               <div className="grid gap-3 sm:grid-cols-2">
                 <TextField
                   label="Title"
@@ -445,11 +513,25 @@ export function SiteEditor({
                 value={row.quote}
                 onChange={(v) => update({ quote: v })}
               />
-              <TextField
-                label="Author"
-                value={row.author}
-                onChange={(v) => update({ author: v })}
-                placeholder="Parent of a JOAD archer"
+              <div className="grid gap-3 sm:grid-cols-2">
+                <TextField
+                  label="Author"
+                  value={row.author}
+                  onChange={(v) => update({ author: v })}
+                  placeholder="Dana R."
+                />
+                <TextField
+                  label="Role"
+                  value={row.role ?? ""}
+                  onChange={(v) => update({ role: v })}
+                  placeholder="Parent of a JOAD archer"
+                />
+              </div>
+              <ImageField
+                label="Author photo"
+                value={row.image_url ?? ""}
+                onUpload={uploadImage}
+                onChange={(v) => update({ image_url: v })}
               />
             </div>
           )}
@@ -462,11 +544,14 @@ export function SiteEditor({
       {tab === "gallery" ? (
         <>
       {/* Gallery */}
-      <Card title="Gallery">
+      <Card
+        title="Gallery"
+        description="The first photo runs at double size on your page. Captions are optional and show when a visitor opens a photo."
+      >
         <GalleryField
-          urls={c.gallery}
+          images={c.gallery}
           onUpload={uploadImage}
-          onChange={(urls) => set("gallery", urls)}
+          onChange={(images) => set("gallery", images)}
         />
       </Card>
 
@@ -540,9 +625,18 @@ export function SiteEditor({
         <p className="text-sm text-muted-foreground">
           When off, visitors to your club URL see a not-found page.
         </p>
+        {c.site_published && !siteIsReady(readiness) ? (
+          <p className="rounded-md bg-coral-100 px-3 py-2 text-sm text-coral-700 dark:bg-coral-400/15 dark:text-coral-300">
+            Publishing is on, but your page still isn&rsquo;t live — the
+            essentials at the top of this editor have to be in first.
+          </p>
+        ) : null}
       </Card>
 
-      <ShareSite slug={slug} />
+      <ShareSite
+        slug={slug}
+        live={c.site_published && siteIsReady(readiness)}
+      />
         </>
       ) : null}
 
@@ -740,13 +834,13 @@ function ImageField({
 }
 
 function GalleryField({
-  urls,
+  images,
   onUpload,
   onChange,
 }: {
-  urls: string[];
+  images: GalleryImage[];
   onUpload: (file: File) => Promise<string>;
-  onChange: (urls: string[]) => void;
+  onChange: (images: GalleryImage[]) => void;
 }) {
   const ref = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -755,40 +849,85 @@ function GalleryField({
     if (!files || files.length === 0) return;
     setBusy(true);
     try {
-      const uploaded: string[] = [];
+      const uploaded: GalleryImage[] = [];
       for (const file of Array.from(files)) {
-        uploaded.push(await onUpload(file));
+        uploaded.push({ url: await onUpload(file), caption: "" });
       }
-      onChange([...urls, ...uploaded]);
+      onChange([...images, ...uploaded]);
     } finally {
       setBusy(false);
     }
   }
 
+  function update(index: number, patch: Partial<GalleryImage>) {
+    onChange(images.map((g, i) => (i === index ? { ...g, ...patch } : g)));
+  }
+
+  /** Reordering matters here: the first photo is the lead tile on the page. */
+  function move(index: number, delta: number) {
+    const target = index + delta;
+    if (target < 0 || target >= images.length) return;
+    const next = [...images];
+    [next[index], next[target]] = [next[target], next[index]];
+    onChange(next);
+  }
+
   return (
     <div className="flex flex-col gap-3">
-      {urls.length > 0 ? (
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-          {urls.map((src, i) => (
-            <div key={i} className="relative">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={src}
-                alt=""
-                className="aspect-square w-full rounded-lg object-cover"
-              />
+      {images.map((image, i) => (
+        <div
+          key={i}
+          className="flex items-start gap-3 rounded-lg border border-border p-3"
+        >
+          <span className="relative h-20 w-24 shrink-0 overflow-hidden rounded-lg bg-muted">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={image.url}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+            {i === 0 ? (
+              <span className="absolute inset-x-0 bottom-0 bg-ink-900/70 py-0.5 text-center text-[10px] font-semibold text-white">
+                Lead
+              </span>
+            ) : null}
+          </span>
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
+            <TextField
+              label="Caption"
+              value={image.caption}
+              onChange={(v) => update(i, { caption: v })}
+              placeholder="Optional — e.g. Saturday morning JOAD session"
+            />
+            <div className="flex flex-wrap gap-1">
               <button
                 type="button"
-                onClick={() => onChange(urls.filter((_, idx) => idx !== i))}
-                className="absolute right-1 top-1 rounded-full bg-ink-900/70 p-1 text-white"
-                aria-label="Remove image"
+                onClick={() => move(i, -1)}
+                disabled={i === 0}
+                className={`${buttonGhost} px-2 py-1 text-xs disabled:opacity-40`}
               >
-                <TrashIcon className="h-4 w-4" />
+                ↑ Up
+              </button>
+              <button
+                type="button"
+                onClick={() => move(i, 1)}
+                disabled={i === images.length - 1}
+                className={`${buttonGhost} px-2 py-1 text-xs disabled:opacity-40`}
+              >
+                ↓ Down
+              </button>
+              <button
+                type="button"
+                onClick={() => onChange(images.filter((_, idx) => idx !== i))}
+                className={`${buttonGhost} px-2 py-1 text-xs`}
+              >
+                <TrashIcon className="h-3.5 w-3.5" />
+                Remove
               </button>
             </div>
-          ))}
+          </div>
         </div>
-      ) : null}
+      ))}
       <input
         ref={ref}
         type="file"
@@ -806,6 +945,53 @@ function GalleryField({
         <PlusIcon className="h-4 w-4" />
         {busy ? "Uploading…" : "Add photos"}
       </button>
+    </div>
+  );
+}
+
+/** Swatches for the club's brand accent, previewed as they appear on the page. */
+const ACCENT_SWATCHES: Record<AccentColor, { label: string; className: string }> = {
+  gold: { label: "Gold", className: "bg-[#ffd257]" },
+  aqua: { label: "Aqua", className: "bg-[#65def1]" },
+  coral: { label: "Coral", className: "bg-[#d92020]" },
+  forest: { label: "Forest", className: "bg-[#15653f]" },
+  slate: { label: "Slate", className: "bg-[#3f4356]" },
+};
+
+function AccentPicker({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  // An empty stored value means "not chosen yet", which renders as gold.
+  const active = value || "gold";
+  return (
+    <div className="flex flex-wrap gap-3">
+      {ACCENT_COLORS.map((accent) => {
+        const swatch = ACCENT_SWATCHES[accent];
+        const on = accent === active;
+        return (
+          <button
+            key={accent}
+            type="button"
+            onClick={() => onChange(accent)}
+            aria-pressed={on}
+            className={`flex items-center gap-2.5 rounded-xl border px-4 py-2.5 text-sm font-medium transition ${
+              on
+                ? "border-gold-400 bg-muted text-foreground"
+                : "border-border text-muted-foreground hover:bg-muted"
+            }`}
+          >
+            <span
+              className={`h-5 w-5 rounded-full ${swatch.className}`}
+              aria-hidden
+            />
+            {swatch.label}
+          </button>
+        );
+      })}
     </div>
   );
 }

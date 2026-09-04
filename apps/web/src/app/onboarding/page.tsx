@@ -39,6 +39,8 @@ export default async function OnboardingPage() {
           description: org.description ?? "",
           website: org.website ?? "",
           logo_url: org.logo_url ?? "",
+          tagline: org.tagline ?? "",
+          hero_image_url: org.hero_image_url ?? "",
           address_line1: org.address_line1 ?? "",
           address_line2: org.address_line2 ?? "",
           city: org.city ?? "",

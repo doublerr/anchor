@@ -6,9 +6,11 @@
 import type {
   EventItem,
   Faq,
+  GalleryImage,
   Highlight,
   PricingItem,
   Program,
+  Testimonial,
 } from "@/lib/org";
 
 export function emptyHighlight(): Highlight {
@@ -16,21 +18,32 @@ export function emptyHighlight(): Highlight {
 }
 
 export function emptyProgram(): Program {
-  return { name: "", audience: "", blurb: "", cta_label: "", cta_url: "" };
+  return {
+    name: "",
+    audience: "",
+    blurb: "",
+    cta_label: "",
+    cta_url: "",
+    image_url: "",
+  };
 }
 
 export function emptyPricing(): PricingItem {
-  return { name: "", price: "", cadence: "", note: "" };
+  return { name: "", price: "", cadence: "", note: "", featured: false };
 }
 
 export function emptyEvent(): EventItem {
-  return { title: "", date: "", blurb: "", url: "" };
+  return { title: "", date: "", blurb: "", url: "", image_url: "" };
 }
 
-export function emptyTestimonial(): { quote: string; author: string } {
-  return { quote: "", author: "" };
+export function emptyTestimonial(): Testimonial {
+  return { quote: "", author: "", role: "", image_url: "" };
 }
 
 export function emptyFaq(): Faq {
   return { q: "", a: "" };
+}
+
+export function emptyGalleryImage(): GalleryImage {
+  return { url: "", caption: "" };
 }

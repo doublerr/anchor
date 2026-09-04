@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProgramsPage } from "@/components/public-site/programs-page";
 import { getPublicSite, listPublishedSlugs } from "@/lib/public-site";
+import { cityRegion, clubMetadata } from "@/lib/club-seo";
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -19,23 +20,14 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   if (!data) return { title: "Not found" };
 
   const { site } = data;
-  const description =
-    site.programs_intro?.trim() ||
-    `Programs and classes at ${site.name}.`;
+  const place = cityRegion(site);
 
-  return {
-    title: `Programs · ${site.name}`,
-    description,
-    openGraph: {
-      title: `Programs · ${site.name}`,
-      description,
-      images: site.hero_image_url
-        ? [site.hero_image_url]
-        : site.logo_url
-          ? [site.logo_url]
-          : undefined,
-    },
-  };
+  return clubMetadata(site, {
+    path: "/programs",
+    title: place ? `Archery Programs in ${place} — ${site.name}` : `Programs — ${site.name}`,
+    description: site.programs_intro?.trim() ||
+      `Archery programs, classes and lessons at ${site.name}${place ? ` in ${place}` : ""}.`,
+  });
 }
 
 export default async function ClubProgramsPage({ params }: Params) {

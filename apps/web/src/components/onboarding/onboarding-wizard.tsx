@@ -20,6 +20,7 @@ import {
 } from "@/lib/slug";
 import { CLUB_URL_DOMAIN } from "@/lib/site";
 import { AddressAutocomplete } from "@/components/onboarding/address-autocomplete";
+import { missingEssentials } from "@/lib/site-essentials";
 
 type CoreFields = {
   name: string;
@@ -28,6 +29,8 @@ type CoreFields = {
   description: string;
   website: string;
   logo_url: string;
+  tagline: string;
+  hero_image_url: string;
   address_line1: string;
   address_line2: string;
   city: string;
@@ -85,7 +88,10 @@ export function OnboardingWizard({
   });
   const [locations, setLocations] = useState<LocationInput[]>([]);
   const [error, setError] = useState<string>();
-  const [uploading, setUploading] = useState(false);
+  // Which image is mid-upload, so only that button shows a spinner.
+  const [uploading, setUploading] = useState<
+    "logo_url" | "hero_image_url" | null
+  >(null);
   // Once the user hand-edits the slug we stop auto-deriving it from the name.
   const [slugTouched, setSlugTouched] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -195,26 +201,35 @@ export function OnboardingWizard({
     setStep((s) => Math.max(s - 1, 0));
   }
 
-  async function onLogoChange(file: File | undefined) {
+  /**
+   * Upload an image into the org's media bucket and store its URL on `field`.
+   * Shared by the logo and the hero photo — same bucket, same path convention
+   * as the /site editor.
+   */
+  async function uploadImage(
+    field: "logo_url" | "hero_image_url",
+    file: File | undefined,
+  ) {
     if (!file) return;
-    setUploading(true);
+    setUploading(field);
     setError(undefined);
     try {
       const supabase = createClient();
       const ext = file.name.split(".").pop() || "png";
-      const path = `${orgId}/logo-${Date.now()}.${ext}`;
+      const kind = field === "logo_url" ? "logo" : "hero";
+      const path = `${orgId}/${kind}-${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage
         .from("org-logos")
         .upload(path, file, { upsert: true });
       if (upErr) throw upErr;
       const { data } = supabase.storage.from("org-logos").getPublicUrl(path);
-      set("logo_url", data.publicUrl);
+      set(field, data.publicUrl);
     } catch (e) {
       setError(
-        `Logo upload failed: ${e instanceof Error ? e.message : "unknown error"}`,
+        `Image upload failed: ${e instanceof Error ? e.message : "unknown error"}`,
       );
     } finally {
-      setUploading(false);
+      setUploading(null);
     }
   }
 
@@ -286,14 +301,20 @@ export function OnboardingWizard({
             set={set}
             onNameChange={onNameChange}
             onSlugChange={onSlugChange}
-            uploading={uploading}
+            uploading={uploading === "logo_url"}
             fileRef={fileRef}
-            onLogoChange={onLogoChange}
+            onLogoChange={(f) => uploadImage("logo_url", f)}
           />
         ) : null}
         {step === 1 ? <StepContact fields={fields} set={set} /> : null}
         {step === 2 ? (
-          <StepDetails fields={fields} set={set} timezones={timezones} />
+          <StepDetails
+            fields={fields}
+            set={set}
+            timezones={timezones}
+            uploading={uploading === "hero_image_url"}
+            onHeroChange={(f) => uploadImage("hero_image_url", f)}
+          />
         ) : null}
         {step === 3 ? (
           <StepLocations
@@ -640,22 +661,90 @@ function StepDetails({
   fields,
   set,
   timezones,
+  uploading,
+  onHeroChange,
 }: {
   fields: CoreFields;
   set: SetFn;
   timezones: string[];
+  uploading: boolean;
+  onHeroChange: (file: File | undefined) => void;
 }) {
+  const heroRef = useRef<HTMLInputElement>(null);
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       <div>
         <h2 className="text-lg font-semibold tracking-tight text-foreground">
-          Club details
+          Your public page
         </h2>
         <p className="text-sm text-muted-foreground">
-          Your timezone and currency. Hours live on each site&rsquo;s Google
-          Maps link.
+          Anchor gives every club a public page. These two are what make it look
+          like a real club rather than a placeholder — you can change them any
+          time.
         </p>
       </div>
+
+      {/*
+        Asked for here rather than left to the /site editor: a club that leaves
+        onboarding with a photo and a tagline already has a page worth looking
+        at, and the editor becomes refinement instead of a blank form. Both are
+        required before the page will be served (see lib/site-essentials.ts), so
+        they're labelled that way rather than as "optional".
+      */}
+      <div className={labelClass}>
+        Hero photo <RequiredForLive />
+        <span className="text-sm font-normal text-muted-foreground">
+          A wide shot of your range, a class on the line, or your archers. It
+          fills the top of your page.
+        </span>
+        <div className="flex items-center gap-4">
+          <span className="flex h-20 w-32 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted">
+            {fields.hero_image_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={fields.hero_image_url}
+                alt="Hero preview"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <span className="text-xs text-muted-foreground">No photo</span>
+            )}
+          </span>
+          <input
+            ref={heroRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => onHeroChange(e.target.files?.[0])}
+          />
+          <button
+            type="button"
+            onClick={() => heroRef.current?.click()}
+            disabled={uploading}
+            className={`${buttonSecondary} px-3 py-2 text-sm`}
+          >
+            {uploading
+              ? "Uploading…"
+              : fields.hero_image_url
+                ? "Replace"
+                : "Upload"}
+          </button>
+        </div>
+      </div>
+
+      <label className={labelClass}>
+        Tagline <RequiredForLive />
+        <span className="text-sm font-normal text-muted-foreground">
+          One line under your club name, saying who you&rsquo;re for.
+        </span>
+        <input
+          value={fields.tagline}
+          onChange={(e) => set("tagline", e.target.value)}
+          className={fieldClass}
+          placeholder="Coaching archers of every age in Austin since 1995"
+        />
+      </label>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className={labelClass}>
@@ -691,6 +780,15 @@ function StepDetails({
         </label>
       </div>
     </div>
+  );
+}
+
+/** Marks a field the public page can't be served without. */
+function RequiredForLive() {
+  return (
+    <span className="ml-1 rounded-full bg-gold-100 px-2 py-0.5 text-xs font-semibold text-ink-900 dark:bg-gold-400/20 dark:text-gold-100">
+      Needed to go live
+    </span>
   );
 }
 
@@ -840,6 +938,15 @@ function StepReview({
   locations: LocationInput[];
 }) {
   const named = locations.filter((l) => l.name.trim());
+  // The wizard can't collect programs, so that essential is always outstanding
+  // here — which is exactly the thing to tell them about before they leave.
+  const missing = missingEssentials({
+    hero_image_url: fields.hero_image_url,
+    tagline: fields.tagline,
+    about: null,
+    description: fields.description,
+    programs: null,
+  });
   return (
     <div className="flex flex-col gap-4">
       <div>
@@ -885,6 +992,11 @@ function StepReview({
             .filter(Boolean)
             .join(", ")}
         />
+        <Item label="Tagline" value={fields.tagline || "—"} />
+        <Item
+          label="Hero photo"
+          value={fields.hero_image_url ? "Added" : "Not added"}
+        />
         <Item label="Timezone" value={fields.timezone || "—"} />
         <Item label="Currency" value={fields.currency || "—"} />
         <Item
@@ -896,6 +1008,38 @@ function StepReview({
           value={named.length ? named.map((l) => l.name).join(", ") : "None"}
         />
       </dl>
+
+      {/*
+        Finishing setup is never blocked on these — being locked out of the whole
+        product over an image upload would be worse than a dark page. But an
+        admin should leave onboarding knowing exactly why their URL isn't
+        working yet, rather than discovering it later.
+      */}
+      {missing.length > 0 ? (
+        <div className="rounded-lg border border-border bg-background p-4">
+          <p className="text-sm font-medium text-foreground">
+            Your public page won&rsquo;t be live yet
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            We hold your club URL until it has enough on it to be worth
+            visiting. Still needed:
+          </p>
+          <ul className="mt-2 flex flex-col gap-1">
+            {missing.map((essential) => (
+              <li
+                key={essential.id}
+                className="text-sm text-muted-foreground before:mr-2 before:content-['•']"
+              >
+                {essential.label}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-sm text-muted-foreground">
+            You can finish this from <span className="font-medium text-foreground">Public site</span> right
+            after setup.
+          </p>
+        </div>
+      ) : null}
     </div>
   );
 }

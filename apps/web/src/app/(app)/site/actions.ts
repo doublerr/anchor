@@ -3,10 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getAdminOrg, PUBLIC_TEAM_ROLES } from "@/lib/org";
+import { getAdminOrg, isAccentColor, PUBLIC_TEAM_ROLES } from "@/lib/org";
 import type {
   EventItem,
   Faq,
+  GalleryImage,
   Highlight,
   PricingItem,
   Program,
@@ -19,6 +20,9 @@ export type SiteContentPayload = {
   logo_url: string;
   tagline: string;
   hero_image_url: string;
+  about_image_url: string;
+  /** One of ACCENT_COLORS, or "" for the default. */
+  accent_color: string;
   announcement: string;
   cta_label: string;
   cta_url: string;
@@ -34,7 +38,7 @@ export type SiteContentPayload = {
   pricing: PricingItem[];
   events: EventItem[];
   testimonials: Testimonial[];
-  gallery: string[];
+  gallery: GalleryImage[];
   faqs: Faq[];
   social_links: SocialLinks;
   site_published: boolean;
@@ -98,7 +102,18 @@ export async function saveSite(
     return { error: "Founded year must be a number (e.g. 1995)." };
   }
 
-  const gallery = payload.gallery.map((s) => s.trim()).filter(Boolean);
+  // The accent drives CSS custom properties on the public page, and the column
+  // has a matching check constraint — validate here so a bad value fails as a
+  // readable message rather than a database error.
+  const accent = payload.accent_color.trim();
+  if (accent && !isAccentColor(accent)) {
+    return { error: "That is not a valid accent color." };
+  }
+
+  // Drop gallery entries whose upload never completed; keep captions trimmed.
+  const gallery = payload.gallery
+    .filter((g) => g.url?.trim())
+    .map((g) => ({ url: g.url.trim(), caption: g.caption?.trim() ?? "" }));
 
   const { error } = await supabase
     .from("organizations")
@@ -106,6 +121,8 @@ export async function saveSite(
       logo_url: clean(payload.logo_url),
       tagline: clean(payload.tagline),
       hero_image_url: clean(payload.hero_image_url),
+      about_image_url: clean(payload.about_image_url),
+      accent_color: accent || null,
       announcement: clean(payload.announcement),
       cta_label: clean(payload.cta_label),
       cta_url: clean(payload.cta_url),

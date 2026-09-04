@@ -1,8 +1,12 @@
+import { cache } from "react";
 import { createPublicClient } from "@/lib/supabase/public";
 import { RESERVED_SLUGS, validateSlug } from "@/lib/slug";
+import { isAccentColor } from "@/lib/org";
 import type {
+  AccentColor,
   EventItem,
   Faq,
+  GalleryImage,
   Highlight,
   OrgMemberRole,
   PricingItem,
@@ -30,6 +34,8 @@ export type PublicSite = {
   highlights: Highlight[] | null;
   logo_url: string | null;
   hero_image_url: string | null;
+  about_image_url: string | null;
+  accent_color: AccentColor | null;
   announcement: string | null;
   programs_intro: string | null;
   programs: Program[] | null;
@@ -37,7 +43,7 @@ export type PublicSite = {
   pricing: PricingItem[] | null;
   events: EventItem[] | null;
   testimonials: Testimonial[] | null;
-  gallery: string[] | null;
+  gallery: GalleryImage[] | null;
   faqs: Faq[] | null;
   social_links: SocialLinks | null;
   cta_label: string | null;
@@ -56,6 +62,7 @@ export type PublicSite = {
   google_maps_url: string | null;
   latitude: number | null;
   longitude: number | null;
+  updated_at: string | null;
 };
 
 /** An additional location for a public club site. */
@@ -90,12 +97,40 @@ export type PublicSiteData = {
 };
 
 /**
+ * Coerce a stored gallery into `{ url, caption }[]`.
+ *
+ * The column used to hold a flat array of URL strings. The migration reshapes
+ * existing rows, but a row written by an older deploy (or a client that hasn't
+ * picked up the new editor) can still arrive in the legacy shape — so read
+ * tolerantly rather than rendering a broken grid.
+ */
+function normalizeGallery(raw: unknown): GalleryImage[] | null {
+  if (!Array.isArray(raw)) return null;
+  const items = raw
+    .map((entry): GalleryImage | null => {
+      if (typeof entry === "string") return { url: entry, caption: "" };
+      if (entry && typeof entry === "object") {
+        const { url, caption } = entry as Partial<GalleryImage>;
+        if (typeof url === "string" && url.trim()) {
+          return { url, caption: typeof caption === "string" ? caption : "" };
+        }
+      }
+      return null;
+    })
+    .filter((v): v is GalleryImage => v !== null);
+  return items.length > 0 ? items : null;
+}
+
+/**
  * Load the published public site for a slug, or `null` when there is no
  * published, onboarded org at that slug. Reserved slugs never resolve to a
  * site. Reads go through the curated `org_public_site` / `location_public_site`
  * views, which are granted to `anon`, so this works without a session.
+ *
+ * Wrapped in React `cache()` so the club layout (which needs the accent color)
+ * and the page beneath it share a single round-trip per render.
  */
-export async function getPublicSite(
+export const getPublicSite = cache(async function getPublicSite(
   slug: string,
 ): Promise<PublicSiteData | null> {
   const normalized = slug.trim().toLowerCase();
@@ -129,16 +164,74 @@ export async function getPublicSite(
       .order("full_name", { ascending: true }),
   ]);
 
+  const record = site as PublicSite;
+
   return {
-    site: site as PublicSite,
+    site: {
+      ...record,
+      gallery: normalizeGallery(record.gallery),
+      // Guard against a value predating the check constraint.
+      accent_color: isAccentColor(record.accent_color)
+        ? record.accent_color
+        : null,
+    },
     locations: (locations as PublicLocation[]) ?? [],
     team: (team as PublicTeamMember[]) ?? [],
   };
-}
+});
 
 /** All published club slugs, for static pre-rendering. */
 export async function listPublishedSlugs(): Promise<string[]> {
   const supabase = createPublicClient();
   const { data } = await supabase.from("org_public_site").select("slug");
   return (data ?? []).map((r) => (r as { slug: string }).slug);
+}
+
+/** One club's entry in the sitemap, with which sub-pages are worth listing. */
+export type SitemapSite = {
+  slug: string;
+  lastModified: Date;
+  hasAboutPage: boolean;
+  hasProgramsPage: boolean;
+};
+
+/**
+ * Every published club, for the sitemap.
+ *
+ * Sub-pages are listed only when they hold real content. `/{slug}/about`
+ * renders whether or not the club filled in Mission/Method/Facilities, and
+ * submitting a page that is a heading and a call to action invites a
+ * thin-content judgement against the whole domain rather than helping the club.
+ * The nav still links them, so nothing becomes unreachable.
+ */
+export async function listSitemapSites(): Promise<SitemapSite[]> {
+  const supabase = createPublicClient();
+
+  type Row = Partial<
+    Pick<
+      PublicSite,
+      "updated_at" | "mission" | "method" | "facilities" | "programs"
+    >
+  > &
+    Pick<PublicSite, "slug">;
+
+  const full = await supabase
+    .from("org_public_site")
+    .select("slug, updated_at, mission, method, facilities, programs");
+
+  // `updated_at` arrived in a later migration than the view itself. If it isn't
+  // there yet, still list every club — a sitemap without <lastmod> is worth far
+  // more than one that silently drops back to the marketing page alone.
+  const { data } = full.error
+    ? await supabase.from("org_public_site").select("slug")
+    : full;
+
+  return ((data as Row[]) ?? []).map((row) => ({
+    slug: row.slug,
+    lastModified: row.updated_at ? new Date(row.updated_at) : new Date(),
+    hasAboutPage: Boolean(
+      row.mission?.trim() || row.method?.trim() || row.facilities?.trim(),
+    ),
+    hasProgramsPage: Boolean(row.programs && row.programs.length > 0),
+  }));
 }

@@ -4,7 +4,6 @@ import Script from "next/script";
 import "./globals.css";
 import {
   ORG_NAME,
-  PRICING,
   SITE_DESCRIPTION,
   SITE_KEYWORDS,
   SITE_NAME,
@@ -61,49 +60,6 @@ export const viewport: Viewport = {
   themeColor: "#22242F",
 };
 
-// Site-wide structured data: identifies the organization and the product
-// (with pricing tiers) so search engines and AI crawlers can extract facts
-// directly. Rendered once, in <head>, on every page.
-const structuredData = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Organization",
-      "@id": `${SITE_URL}/#organization`,
-      name: ORG_NAME,
-      url: SITE_URL,
-      logo: `${SITE_URL}/brand/icon-gold-512.png`,
-      description: SITE_DESCRIPTION,
-    },
-    {
-      "@type": "WebSite",
-      "@id": `${SITE_URL}/#website`,
-      url: SITE_URL,
-      name: SITE_NAME,
-      description: SITE_DESCRIPTION,
-      publisher: { "@id": `${SITE_URL}/#organization` },
-    },
-    {
-      "@type": "SoftwareApplication",
-      "@id": `${SITE_URL}/#software`,
-      name: SITE_NAME,
-      applicationCategory: "BusinessApplication",
-      applicationSubCategory: "Sports club management software",
-      operatingSystem: "Web",
-      description: SITE_DESCRIPTION,
-      url: SITE_URL,
-      publisher: { "@id": `${SITE_URL}/#organization` },
-      offers: PRICING.map((tier) => ({
-        "@type": "Offer",
-        name: `${tier.name} plan`,
-        price: tier.price,
-        priceCurrency: "USD",
-        category: tier.cadence,
-      })),
-    },
-  ],
-};
-
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
@@ -111,11 +67,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <script
-          type="application/ld+json"
-          // Structured data is trusted, build-time content — safe to inline.
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-        />
         {children}
       </body>
 

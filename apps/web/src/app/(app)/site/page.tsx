@@ -33,6 +33,8 @@ export default async function SitePage() {
     logo_url: org.logo_url ?? "",
     tagline: org.tagline ?? "",
     hero_image_url: org.hero_image_url ?? "",
+    about_image_url: org.about_image_url ?? "",
+    accent_color: org.accent_color ?? "",
     announcement: org.announcement ?? "",
     cta_label: org.cta_label ?? "",
     cta_url: org.cta_url ?? "",
@@ -48,7 +50,11 @@ export default async function SitePage() {
     pricing: org.pricing ?? [],
     events: org.events ?? [],
     testimonials: org.testimonials ?? [],
-    gallery: org.gallery ?? [],
+    // The column was reshaped from string[] to { url, caption }[]; a row written
+    // before the migration can still arrive in the legacy shape.
+    gallery: (org.gallery ?? []).map((g) =>
+      typeof g === "string" ? { url: g, caption: "" } : g,
+    ),
     faqs: org.faqs ?? [],
     social_links: org.social_links ?? {},
     site_published: org.site_published,
@@ -60,6 +66,7 @@ export default async function SitePage() {
       orgId={org.id}
       slug={org.slug}
       initial={initial}
+      description={org.description ?? ""}
       teamMembers={teamMembers}
     />
   );

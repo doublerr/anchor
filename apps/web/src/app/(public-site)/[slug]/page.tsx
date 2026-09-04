@@ -5,6 +5,7 @@ import {
   getPublicSite,
   listPublishedSlugs,
 } from "@/lib/public-site";
+import { clubMetadata, clubStructuredData } from "@/lib/club-seo";
 
 // Statically rendered per club, revalidated hourly; the site editor's saveSite
 // action also revalidates a club's path on demand so edits go live immediately.
@@ -23,27 +24,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const data = await getPublicSite(slug);
   if (!data) return { title: "Not found" };
-
-  const { site } = data;
-  const description =
-    site.tagline ||
-    site.description ||
-    `${site.name} — archery club. Programs, schedule, and how to join.`;
-
-  return {
-    // Root layout applies the "%s · Anchor" title template.
-    title: site.name,
-    description,
-    openGraph: {
-      title: site.name,
-      description,
-      images: site.hero_image_url
-        ? [site.hero_image_url]
-        : site.logo_url
-          ? [site.logo_url]
-          : undefined,
-    },
-  };
+  return clubMetadata(data.site);
 }
 
 export default async function ClubSitePage({ params }: Params) {
@@ -52,10 +33,16 @@ export default async function ClubSitePage({ params }: Params) {
   if (!data) notFound();
 
   return (
-    <ClubSite
-      site={data.site}
-      locations={data.locations}
-      team={data.team}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            clubStructuredData(data.site, data.locations),
+          ),
+        }}
+      />
+      <ClubSite data={data} />
+    </>
   );
 }

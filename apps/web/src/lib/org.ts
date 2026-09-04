@@ -40,6 +40,8 @@ export type Program = {
   blurb: string;
   cta_label: string;
   cta_url: string;
+  /** Photo for the program card. Optional — cards fall back to a tinted tile. */
+  image_url?: string;
 };
 
 /** A pricing / membership card. */
@@ -48,6 +50,8 @@ export type PricingItem = {
   price: string;
   cadence: string;
   note: string;
+  /** Highlights one tier as the recommended one (Von Restorff). */
+  featured?: boolean;
 };
 
 /** An upcoming event / clinic. */
@@ -56,10 +60,42 @@ export type EventItem = {
   date: string;
   blurb: string;
   url: string;
+  /** Photo for the event card. */
+  image_url?: string;
 };
 
 /** A testimonial / review. */
-export type Testimonial = { quote: string; author: string };
+export type Testimonial = {
+  quote: string;
+  author: string;
+  /** e.g. "Parent of a junior archer" — shown under the author. */
+  role?: string;
+  /** Author photo, shown as a small avatar beside the attribution. */
+  image_url?: string;
+};
+
+/** A gallery photo with an optional caption. */
+export type GalleryImage = { url: string; caption: string };
+
+/**
+ * A club's brand accent. A closed set rather than a free hex value, so every
+ * choice is guaranteed to meet contrast in both the light and dark club themes.
+ * Null/absent falls back to `gold`.
+ */
+export type AccentColor = "gold" | "aqua" | "coral" | "forest" | "slate";
+
+export const ACCENT_COLORS: readonly AccentColor[] = [
+  "gold",
+  "aqua",
+  "coral",
+  "forest",
+  "slate",
+] as const;
+
+/** Runtime guard for values arriving from a form or the database. */
+export function isAccentColor(v: unknown): v is AccentColor {
+  return typeof v === "string" && (ACCENT_COLORS as readonly string[]).includes(v);
+}
 
 /** A frequently asked question. */
 export type Faq = { q: string; a: string };
@@ -103,6 +139,8 @@ export type Organization = {
   /* --- Public-site content (all optional; edited from the /site editor) ---- */
   tagline: string | null;
   hero_image_url: string | null;
+  about_image_url: string | null;
+  accent_color: AccentColor | null;
   announcement: string | null;
   cta_label: string | null;
   cta_url: string | null;
@@ -118,7 +156,7 @@ export type Organization = {
   pricing: PricingItem[] | null;
   events: EventItem[] | null;
   testimonials: Testimonial[] | null;
-  gallery: string[] | null;
+  gallery: GalleryImage[] | null;
   faqs: Faq[] | null;
   social_links: SocialLinks | null;
   site_published: boolean;
@@ -130,7 +168,7 @@ export type Organization = {
  * the site editor read the same shape. Includes the public-site content.
  */
 export const ORG_SELECT =
-  "id, name, slug, url_type, address_line1, address_line2, city, region, postal_code, country, phone, email, contact_name, contact_title, website, description, logo_url, timezone, currency, google_maps_url, latitude, longitude, google_place_id, onboarding_completed_at, tagline, hero_image_url, announcement, cta_label, cta_url, about, mission, method, facilities, founded_year, highlights, programs_intro, programs, schedule_url, pricing, events, testimonials, gallery, faqs, social_links, site_published, site_completed_at";
+  "id, name, slug, url_type, address_line1, address_line2, city, region, postal_code, country, phone, email, contact_name, contact_title, website, description, logo_url, timezone, currency, google_maps_url, latitude, longitude, google_place_id, onboarding_completed_at, tagline, hero_image_url, about_image_url, accent_color, announcement, cta_label, cta_url, about, mission, method, facilities, founded_year, highlights, programs_intro, programs, schedule_url, pricing, events, testimonials, gallery, faqs, social_links, site_published, site_completed_at";
 
 export type OrgOnboardingState = {
   org: Organization | null;

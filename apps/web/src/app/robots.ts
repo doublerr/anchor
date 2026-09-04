@@ -12,7 +12,21 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/dashboard", "/login", "/signup", "/auth/"],
+        // Every gated app route, not just /dashboard — these all redirect to
+        // /login for a crawler, which wastes crawl budget that should be going
+        // to club pages.
+        disallow: [
+          "/dashboard",
+          "/site",
+          "/members",
+          "/locations",
+          "/settings",
+          "/onboarding",
+          "/create-organization",
+          "/login",
+          "/signup",
+          "/auth/",
+        ],
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,

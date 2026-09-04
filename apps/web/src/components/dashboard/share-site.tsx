@@ -27,7 +27,18 @@ function useAppOrigin(): string {
  * page. All URLs are composed from the current app origin + slug, so links open
  * against whatever environment you're on (localhost in dev) and never drift.
  */
-export function ShareSite({ slug }: { slug: string }) {
+export function ShareSite({
+  slug,
+  live = true,
+}: {
+  slug: string;
+  /**
+   * Whether the page is actually being served. False while the club still owes
+   * one of the site essentials — handing out a link that 404s is worse than
+   * saying plainly that it isn't ready.
+   */
+  live?: boolean;
+}) {
   const origin = useAppOrigin();
   const publicUrl = `${origin}/${slug}`;
   const loginUrl = `${origin}/login`;
@@ -44,12 +55,16 @@ export function ShareSite({ slug }: { slug: string }) {
           Share your page
         </h2>
         <p className="text-sm text-muted-foreground">
-          Your public club page is live at the address below.
+          {live
+            ? "Your public club page is live at the address below."
+            : "This will be your address once the essentials above are in. It doesn\u2019t work yet \u2014 hold off on sharing it."}
         </p>
       </div>
 
       {/* Live URL */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div
+        className={`flex flex-wrap items-center gap-2 ${live ? "" : "opacity-60"}`}
+      >
         <code className="min-w-0 flex-1 truncate rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground">
           {displayHost}/{slug}
         </code>

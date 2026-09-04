@@ -32,6 +32,8 @@ export type OnboardingPayload = {
   description: string;
   website: string;
   logo_url: string;
+  tagline: string;
+  hero_image_url: string;
   address_line1: string;
   address_line2: string;
   city: string;
@@ -119,6 +121,8 @@ export async function completeOnboarding(
       description: clean(payload.description),
       website,
       logo_url: clean(payload.logo_url),
+      tagline: clean(payload.tagline),
+      hero_image_url: clean(payload.hero_image_url),
       address_line1: clean(payload.address_line1),
       address_line2: clean(payload.address_line2),
       city: clean(payload.city),

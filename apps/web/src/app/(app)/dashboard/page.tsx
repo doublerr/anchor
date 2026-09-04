@@ -13,6 +13,7 @@ import {
 import { buttonPrimary, buttonSecondary } from "@/components/ui/button-styles";
 import { SetupChecklist } from "@/components/dashboard/setup-checklist";
 import { ShareSite } from "@/components/dashboard/share-site";
+import { siteIsReady } from "@/lib/site-essentials";
 
 export const metadata = {
   title: "Overview · Anchor",
@@ -63,7 +64,9 @@ export default async function Dashboard() {
     ]);
 
   const firstName = profile?.full_name?.split(" ")[0];
-  const siteComplete = Boolean(org.site_completed_at);
+  // Readiness, not "did they press Save once" — site_completed_at only records
+  // that the editor was visited, and a saved-but-empty page is still dark.
+  const siteLive = org.site_published && siteIsReady(org);
 
   const stats = [
     {
@@ -100,8 +103,8 @@ export default async function Dashboard() {
 
       {/* Getting-started checklist (hidden once every step is done) */}
       <div className="mt-8">
-        <SetupChecklist siteComplete={siteComplete} />
-        {siteComplete ? <ShareSite slug={org.slug} /> : null}
+        <SetupChecklist org={org} />
+        {siteLive ? <ShareSite slug={org.slug} live /> : null}
       </div>
 
       {/* Stat cards */}
