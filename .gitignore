@@ -143,3 +143,7 @@ vite.config.ts.timestamp-*
 .vite/
 
 .turbo/cache*
+
+# Claude Code skills — vendored source is reinstalled from skills-lock.json
+# (source = "node_modules"; the lockfile is committed). See docs/skills.md.
+.claude/skills/

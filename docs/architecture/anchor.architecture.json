@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Anchor — Archery Club Management SaaS",
+    "quality_profile": "showcase",
+    "viewBox": [1360, 640]
+  },
+  "components": [
+    { "id": "admin", "type": "external", "label": "Club Admin", "sublabel": "Browser", "pos": [40, 270], "size": [150, 64] },
+    { "id": "maps", "type": "external", "label": "Google Maps Platform", "sublabel": "Places + Maps JS", "pos": [230, 110], "size": [160, 64] },
+    { "id": "web", "type": "frontend", "label": "Next.js 16 App Router", "sublabel": "apps/web · SSR + RSC", "pos": [230, 270], "size": [160, 64] },
+    { "id": "gate", "type": "frontend", "label": "Onboarding Gate", "sublabel": "(app) route group", "pos": [480, 270], "size": [150, 64], "tag": "hard gate" },
+    { "id": "sdk", "type": "frontend", "label": "Supabase JS Client", "sublabel": "direct-to-Supabase", "pos": [715, 270], "size": [160, 64] },
+    { "id": "auth", "type": "security", "label": "Supabase Auth", "sublabel": "email + password", "pos": [950, 110], "size": [150, 64], "tag": "JWT" },
+    { "id": "db", "type": "database", "label": "Postgres + RLS", "sublabel": "orgs · members · archers", "pos": [965, 270], "size": [150, 64] },
+    { "id": "rpc", "type": "database", "label": "SECURITY DEFINER RPCs", "sublabel": "provisioning triggers", "pos": [1155, 175], "size": [150, 64] },
+    { "id": "storage", "type": "cloud", "label": "Supabase Storage", "sublabel": "org-logos · static sites", "pos": [965, 430], "size": [150, 64] },
+    { "id": "site", "type": "external", "label": "Hosted Club Site", "sublabel": "anchorplatforms.site/{slug}", "pos": [965, 560], "size": [175, 64] },
+    { "id": "visitor", "type": "external", "label": "Public Visitor", "sublabel": "club microsite", "pos": [1180, 560], "size": [140, 64] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Supabase Project (hosted)", "wraps": ["auth", "db", "rpc", "storage"] },
+    { "kind": "security-group", "label": "Row Level Security · auth.uid()", "wraps": ["db", "rpc"] }
+  ],
+  "connections": [
+    { "id": "admin-web", "from": "admin", "to": "web", "label": "HTTPS", "variant": "emphasis" },
+    { "id": "web-maps", "from": "web", "to": "maps", "label": "address autocomplete", "variant": "dashed" },
+    { "id": "web-gate", "from": "web", "to": "gate", "label": "getAdminOrg()", "variant": "emphasis" },
+    { "id": "gate-sdk", "from": "gate", "to": "sdk", "label": "if onboarded" },
+    { "id": "sdk-db", "from": "sdk", "to": "db", "label": "SQL via PostgREST", "variant": "emphasis" },
+    { "id": "sdk-auth", "from": "sdk", "to": "auth", "label": "sign in → JWT", "variant": "security", "fromSide": "top", "toSide": "left" },
+    { "id": "auth-rpc", "from": "auth", "to": "rpc", "label": "signup", "variant": "security" },
+    { "id": "rpc-db", "from": "rpc", "to": "db", "label": "provisions org + roles", "labelAt": [1075, 240] },
+    { "id": "sdk-storage", "from": "sdk", "to": "storage", "label": "upload logo + site", "variant": "dashed", "fromSide": "bottom", "toSide": "left" },
+    { "id": "storage-site", "from": "storage", "to": "site", "label": "serves {slug}", "fromSide": "bottom", "toSide": "top" },
+    { "id": "site-visitor", "from": "site", "to": "visitor", "label": "public club page", "labelDy": -28 }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Client (Next.js 16)", "items": ["App Router at apps/web — SSR + React Server Components", "Route-group gate blocks the app until org onboarding completes", "Supabase JS client reads and writes Supabase directly"] },
+    { "dot": "emerald", "title": "Supabase — no custom backend", "items": ["Postgres is the single source of truth", "SECURITY DEFINER RPCs provision org + membership + archer at signup", "Storage holds org logos and hosted club sites"] },
+    { "dot": "rose", "title": "Security boundary", "items": ["Row Level Security keyed on auth.uid() is the entire backend boundary", "Auth issues JWTs; roles (admin / archer / guardian) are derived, not stored"] },
+    { "dot": "amber", "title": "Public hosting", "items": ["Static club microsites served at anchorplatforms.site/{slug}", "Google Maps Places powers onboarding address autocomplete"] }
+  ]
+}
